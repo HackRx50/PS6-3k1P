@@ -1,0 +1,30 @@
+{
+    "quiz": [
+      {
+        "question": "What is the capital of France?",
+        "options": ["Berlin", "Madrid", "Paris", "Rome"],
+        "correctAnswer": "Paris"
+      },
+      {
+        "question": "Who wrote the play 'Romeo and Juliet'?",
+        "options": ["William Shakespeare", "Leo Tolstoy", "Mark Twain", "Charles Dickens"],
+        "correctAnswer": "William Shakespeare"
+      },
+      {
+        "question": "What is the largest planet in our solar system?",
+        "options": ["Earth", "Jupiter", "Mars", "Saturn"],
+        "correctAnswer": "Jupiter"
+      },
+      {
+        "question": "Which element has the chemical symbol 'O'?",
+        "options": ["Oxygen", "Gold", "Osmium", "Zinc"],
+        "correctAnswer": "Oxygen"
+      },
+      {
+        "question": "In which year did World War II end?",
+        "options": ["1945", "1918", "1939", "1965"],
+        "correctAnswer": "1945"
+      }
+    ]
+  }
+  
