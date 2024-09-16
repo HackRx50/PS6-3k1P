@@ -13,6 +13,11 @@ if not os.path.exists(UPLOAD_FOLDER):
 # Set the folder path for MP4 videos
 VIDEO_FOLDER = 'vids'
 
+# test
+@app.route('/api/hello', methods=['GET'])
+def hello():
+    return jsonify({"message": "Hello from the server!"})
+
 # Route for handling PDF file uploads
 @app.route('/upload_pdf', methods=['POST'])
 def upload_pdf():
