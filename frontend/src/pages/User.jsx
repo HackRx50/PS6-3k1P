@@ -14,7 +14,7 @@ function App() {
 
   useEffect(() => {
     // Fetch the video from the backend
-    fetch('http://localhost:5000/get_video/sample.mp4')
+    fetch(import.meta.env.VITE_BACKEND_URL+'/get_video/sample.mp4')
       .then((response) => response.url)
       .then((url) => setVideoUrl(url))
       .catch((error) => console.error('Error fetching video:', error));
