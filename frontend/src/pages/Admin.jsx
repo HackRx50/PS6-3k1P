@@ -1,6 +1,6 @@
 import React, { useState } from "react"
 import axios from "axios"
-import Navbar from "../components/navbar"
+import Navbar from "../components/Navbar"
 
 function Admin() {
   const [selectedFile, setSelectedFile] = useState(null)

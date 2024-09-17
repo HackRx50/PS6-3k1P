@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react"
 import { useNavigate } from "react-router-dom"
 import ReactPlayer from "react-player"
-import Navbar from "../components/navbar"
+import Navbar from "../components/Navbar"
 
 function App() {
   const [videos, setVideos] = useState([])
