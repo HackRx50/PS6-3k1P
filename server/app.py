@@ -37,8 +37,7 @@ def upload_pdf():
         file_path = os.path.join(UPLOAD_FOLDER, file.filename)
         file.save(file_path)
         
-        # video = create_video(file_path)
-        print(file_path)
+        create_video(file_path)
         
         return jsonify({"message": "PDF uploaded successfully", "file": file.filename}), 200
     else:
