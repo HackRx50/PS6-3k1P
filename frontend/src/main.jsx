@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './index.css';
-import User from './pages/user';
+import User from './pages/User';
 import Admin from './pages/Admin';
 import App from './App';
 import Quiz from './pages/Quiz';
