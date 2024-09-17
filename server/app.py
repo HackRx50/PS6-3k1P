@@ -36,6 +36,16 @@ def upload_pdf():
     else:
         return jsonify({"error": "Invalid file type. Only PDFs are allowed."}), 400
 
+@app.route('/get_videos')
+def get_videos():
+    video_dir = os.path.join(os.path.dirname(__file__), 'vids')
+    try:
+        files = os.listdir(video_dir)
+        return jsonify(files)
+    except OSError as e:
+        app.logger.error(f'Error reading video directory: {e}')
+        return jsonify({'error': 'Error reading video directory'}), 500
+
 # Route to serve MP4 video file
 @app.route('/get_video/<filename>', methods=['GET'])
 def get_video(filename):
