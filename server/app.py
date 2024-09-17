@@ -1,6 +1,8 @@
-from flask import Flask, request, jsonify, send_from_directory
-from flask_cors import CORS
 import os
+
+from flask import Flask, jsonify, request, send_from_directory
+from flask_cors import CORS
+from functions import create_video
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS to allow communication between frontend and backend
@@ -29,9 +31,15 @@ def upload_pdf():
     if file.filename == '':
         return jsonify({"error": "No selected file"}), 400
 
+    print(file.filename)
+
     if file and file.filename.endswith('.pdf'):
         file_path = os.path.join(UPLOAD_FOLDER, file.filename)
         file.save(file_path)
+        
+        # video = create_video(file_path)
+        print(file_path)
+        
         return jsonify({"message": "PDF uploaded successfully", "file": file.filename}), 200
     else:
         return jsonify({"error": "Invalid file type. Only PDFs are allowed."}), 400
