@@ -1,12 +1,10 @@
 import os
-
-from functions import create_video
+import dotenv
+from functions import create_video, combine_audio_and_video
 
 file = "uploads\Personal_Accident_brochure.pdf"
 
-# create_video(file)
-
-print(os.environ['FLUX_API_KEY'])
+create_video(file)
 
 # print('clearing temp folders')
 # IMGS_FOLDER = 'temp_imgs'
