@@ -1,4 +1,4 @@
-## Notes
+# Notes
 
 create virtual env, name it baj
 to create venv `python -m venv baj`
