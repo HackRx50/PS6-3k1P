@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react'
 import Navbar from '../components/navbar'
 import 'tailwindcss/tailwind.css'; // Ensure Tailwind CSS is imported
-import { PieChart } from '@tremor/react'; // Import PieChart from Tremor
+import { DonutChart } from '@tremor/react'; // Import DonutChart from Tremor
 
 const Analytics = () => {
   const [data, setData] = useState(null); // State to store fetched data
   const [selectedVidName, setSelectedVidName] = useState(null); // State to track selected video
 
   useEffect(() => {
-    fetch('http://127.0.0.1:8000/get_all_data')
+    fetch(`${import.meta.env.VITE_BACKEND_URL}/get_all_data`)
       .then(response => response.json())
       .then(data => {
         console.log(data);
@@ -27,10 +27,17 @@ const Analytics = () => {
     }, {});
   };
 
-  const getPieChartData = (items) => {
+  const getDonutChartData = (items) => {
     return items.map(item => ({
       name: item.username,
       value: item.score,
+    }));
+  };
+
+  const getFormattedData = (items) => {
+    return items.map(item => ({
+      name: item.username,
+      amount: item.score,
     }));
   };
 
@@ -47,8 +54,8 @@ const Analytics = () => {
                   onClick={() => setSelectedVidName(vidName)}
                 >
                   <h2 className="text-xl font-bold mb-4">{vidName}</h2>
-                  <PieChart
-                    data={getPieChartData(items)}
+                  <DonutChart
+                    data={getDonutChartData(items)}
                     width={200}
                     height={200}
                   />
@@ -62,6 +69,18 @@ const Analytics = () => {
           {selectedVidName && (
             <div className="mt-8">
               <h2 className="text-2xl font-bold mb-4">Analytics for {selectedVidName}</h2>
+              <DonutChart
+                className="mx-auto"
+                data={getFormattedData(groupByVidName(data)[selectedVidName])}
+                category="name"
+                value="amount"
+                showLabel={true}
+                valueFormatter={(number) =>
+                  `$${Intl.NumberFormat("us").format(number).toString()}`
+                }
+                width={400}
+                height={400}
+              />
               {groupByVidName(data)[selectedVidName].map(item => (
                 <div key={item.id} className="bg-white shadow-md rounded-lg p-4 mb-4">
                   <p className="text-gray-700"><span className="font-semibold">Username:</span> {item.username}</p>

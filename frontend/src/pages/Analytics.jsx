@@ -8,7 +8,7 @@ const Analytics = () => {
   const [selectedVidName, setSelectedVidName] = useState(null); // State to track selected video
 
   useEffect(() => {
-    fetch('https://baj-ttv-fast.onrender.com/get_all_data')
+    fetch(`${import.meta.env.VITE_BACKEND_URL}/get_all_data`)
       .then(response => response.json())
       .then(data => {
         console.log(data);
