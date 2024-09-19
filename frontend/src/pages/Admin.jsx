@@ -3,34 +3,34 @@ import axios from 'axios';
 
 
 function Admin() {
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [uploadStatus, setUploadStatus] = useState('');
+  const [selectedFile, setSelectedFile] = useState(null)
+  const [uploadStatus, setUploadStatus] = useState("")
 
-  const handleFileChange = (e) => {
-    setSelectedFile(e.target.files[0]);
-  };
+  const handleFileChange = e => {
+    setSelectedFile(e.target.files[0])
+  }
 
   const handleUpload = async () => {
     if (!selectedFile) {
-      setUploadStatus('Please select a PDF file.');
-      return;
+      setUploadStatus("Please select a PDF file.")
+      return
     }
 
-    const formData = new FormData();
-    formData.append('pdf', selectedFile);
+    const formData = new FormData()
+    formData.append("pdf", selectedFile)
 
     try {
-      const response = await axios.post(import.meta.env.VITE_BACKEND_URL + '/upload_pdf', formData, {
+      const response = await axios.post(import.meta.env.VITE_BACKEND_URL + "/upload_pdf", formData, {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          "Content-Type": "multipart/form-data",
         },
-      });
+      })
 
       if (response.status === 200) {
-        setUploadStatus('PDF uploaded successfully!');
+        setUploadStatus("PDF uploaded successfully!")
       }
     } catch (error) {
-      setUploadStatus('Error uploading PDF. Please try again.');
+      setUploadStatus("Error uploading PDF. Please try again.")
     }
   };
 
@@ -91,4 +91,4 @@ function Admin() {
   );
 }
 
-export default Admin;
+export default Admin

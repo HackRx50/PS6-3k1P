@@ -1,1 +1,1 @@
-npm run dev to run
+Run Command - `npm run dev`
