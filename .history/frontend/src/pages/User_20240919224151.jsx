@@ -15,8 +15,19 @@ function App() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    const username = generateRandomUsername();
+    fetch(`http://127.0.0.1:8000/create_user`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ username }),
+    })
+    .then(response => response.json())
+    .then(data => console.log('Username sent:', data))
+    .catch(error => console.error('Error sending username:', error));
     // Fetch all videos from the backend
-    fetch(`https://baj-ttv-fast.onrender.com/get_videos`)
+    fetch(`http://127.0.0.1:8000/get_videos`)
       .then((response) => response.json())
       .then((data) => setVideos(data))
       .catch((error) => console.error('Error fetching videos:', error));
@@ -50,7 +61,7 @@ function App() {
   const handleTakeQuiz = () => {
     // Passing analytics data (pause count, play time) to the quiz component
     navigate('/quiz', {
-      state: { selectedVideo, pauseCount, playTime }
+      state: { pauseCount, playTime }
     });
   };
 
@@ -69,7 +80,7 @@ function App() {
         <div className="w-full max-w-xl bg-white shadow-lg rounded-lg overflow-hidden mb-8">
           <ReactPlayer
             ref={playerRef}
-            url={`https://baj-ttv-fast.onrender.com/get_video/${selectedVideo}`}
+            url={`http://127.0.0.1:8000/get_video/${selectedVideo}`}
             playing={false}
             controls
             onEnded={handleVideoEnd}

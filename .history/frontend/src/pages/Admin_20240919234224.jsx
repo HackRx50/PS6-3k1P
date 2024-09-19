@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import Navbar from '../components/navbar';
 
 
 function Admin() {
@@ -50,7 +51,7 @@ function Admin() {
           <div>
             <button
               onClick={navigateToHome}
-              className="px-4 py-2 bg-green-500 text-white rounded-md mr-2 hover:bg-gray-600 transition duration-300"
+              className="px-4 py-2 bg-gray-500 text-white rounded-md mr-2 hover:bg-gray-600 transition duration-300"
             >
               Home
             </button>

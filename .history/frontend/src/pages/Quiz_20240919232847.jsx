@@ -28,7 +28,8 @@ function Quiz() {
         pause_count: pauseCount,
         play_time: playTime,
       };
-      fetch('https://baj-ttv-fast.onrender.com/submit_data', {
+
+      fetch('http://127.0.0.1:8000/submit_data', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

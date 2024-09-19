@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import quizData from './quiz_data.json'; // Assuming quizData is still used
+
 
 const generateRandomUsername = () => {
   const adjectives = ["happy", "lucky", "sunny", "clever", "swift"];
   const nouns = ["cat", "dog", "bird", "fish", "fox"];
   return `${adjectives[Math.floor(Math.random() * adjectives.length)]}${nouns[Math.floor(Math.random() * nouns.length)]}`;
 };
-
 function Quiz() {
   const location = useLocation();
-  const navigate = useNavigate();
   const { pauseCount, playTime, selectedVideo } = location.state || { pauseCount: 0, playTime: 0, selectedVideo: '' };
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
@@ -28,7 +27,8 @@ function Quiz() {
         pause_count: pauseCount,
         play_time: playTime,
       };
-      fetch('https://baj-ttv-fast.onrender.com/submit_data', {
+
+      fetch('http://127.0.0.1:8000/submit_data', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -40,7 +40,6 @@ function Quiz() {
         .catch((error) => console.error('Error:', error));
     }
   }, [showScore, pauseCount, playTime, score, selectedVideo]);
-
   const handleAnswerClick = (answer) => {
     setSelectedAnswer(answer);
   };
@@ -85,12 +84,6 @@ function Quiz() {
               <p className="text-lg">Number of pauses: {pauseCount}</p>
               <p className="text-lg">Total time video played: {playTime} seconds</p>
             </div>
-            <button
-              onClick={() => navigate('/')}
-              className="mt-6 py-3 px-4 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            >
-              Return to Home
-            </button>
           </div>
         ) : (
           <>

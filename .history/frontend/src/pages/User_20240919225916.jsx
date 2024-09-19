@@ -16,7 +16,7 @@ function App() {
 
   useEffect(() => {
     // Fetch all videos from the backend
-    fetch(`https://baj-ttv-fast.onrender.com/get_videos`)
+    fetch(`http://127.0.0.1:8000/get_videos`)
       .then((response) => response.json())
       .then((data) => setVideos(data))
       .catch((error) => console.error('Error fetching videos:', error));
@@ -69,7 +69,7 @@ function App() {
         <div className="w-full max-w-xl bg-white shadow-lg rounded-lg overflow-hidden mb-8">
           <ReactPlayer
             ref={playerRef}
-            url={`https://baj-ttv-fast.onrender.com/get_video/${selectedVideo}`}
+            url={`http://127.0.0.1:8000/get_video/${selectedVideo}`}
             playing={false}
             controls
             onEnded={handleVideoEnd}

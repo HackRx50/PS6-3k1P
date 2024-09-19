@@ -16,7 +16,7 @@ function App() {
 
   useEffect(() => {
     // Fetch all videos from the backend
-    fetch(`https://baj-ttv-fast.onrender.com/get_videos`)
+    fetch(`${import.meta.env.VITE_BACKEND_URL}/get_videos`)
       .then((response) => response.json())
       .then((data) => setVideos(data))
       .catch((error) => console.error('Error fetching videos:', error));
@@ -50,7 +50,7 @@ function App() {
   const handleTakeQuiz = () => {
     // Passing analytics data (pause count, play time) to the quiz component
     navigate('/quiz', {
-      state: { selectedVideo, pauseCount, playTime }
+      state: { pauseCount, playTime }
     });
   };
 
@@ -69,7 +69,7 @@ function App() {
         <div className="w-full max-w-xl bg-white shadow-lg rounded-lg overflow-hidden mb-8">
           <ReactPlayer
             ref={playerRef}
-            url={`https://baj-ttv-fast.onrender.com/get_video/${selectedVideo}`}
+            url={`${import.meta.env.VITE_BACKEND_URL}/get_video/${selectedVideo}`}
             playing={false}
             controls
             onEnded={handleVideoEnd}

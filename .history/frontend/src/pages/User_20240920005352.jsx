@@ -69,7 +69,7 @@ function App() {
         <div className="w-full max-w-xl bg-white shadow-lg rounded-lg overflow-hidden mb-8">
           <ReactPlayer
             ref={playerRef}
-            url={`https://baj-ttv-fast.onrender.com/get_video/${selectedVideo}`}
+            url={`http://127.0.0.1:8000/get_video/${selectedVideo}`}
             playing={false}
             controls
             onEnded={handleVideoEnd}
