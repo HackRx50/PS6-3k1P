@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import quizData from './quiz_data.json'; // Assuming quizData is still used
 
 const generateRandomUsername = () => {
   const adjectives = ["happy", "lucky", "sunny", "clever", "swift"];
@@ -16,7 +15,8 @@ function Quiz() {
   const [score, setScore] = useState(0);
   const [showScore, setShowScore] = useState(false);
   const [selectedAnswer, setSelectedAnswer] = useState('');
-  const [answers, setAnswers] = useState(Array(quizData.quiz.length).fill(null));
+  const [quizData, setQuizData] = useState({});
+  const [answers, setAnswers] = useState([]); // Initialize as an empty array
 
   useEffect(() => {
     const fetchQuizData = async () => {
@@ -31,7 +31,8 @@ function Quiz() {
         const data = await response.json();
         // Assuming the response contains the quiz data
         // Update quizData with the fetched data
-        quizData.quiz = data.quiz; // Update this line based on your data structure
+        setQuizData(data);
+        setAnswers(Array(data.quiz.length).fill(null)); // Update answers based on fetched quiz data
       } catch (error) {
         console.error('Error fetching quiz data:', error);
       }
@@ -118,41 +119,45 @@ function Quiz() {
           </div>
         ) : (
           <>
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold mb-4">
-                Question {currentQuestion + 1}/{quizData.quiz.length}
-              </h2>
-              <div className="text-lg">{quizData.quiz[currentQuestion].question}</div>
-            </div>
-            <div className="space-y-4">
-              {quizData.quiz[currentQuestion].options.map((option, index) => (
-                <button
-                  key={index}
-                  className={`w-full py-3 px-4 text-left bg-gray-200 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded-md ${
-                    selectedAnswer === option ? "bg-indigo-300" : ""
-                  }`}
-                  onClick={() => handleAnswerClick(option)}
-                >
-                  {option}
-                </button>
-              ))}
-            </div>
-            <div className="flex justify-between mt-6">
-              <button
-                onClick={handlePreviousQuestion}
-                disabled={currentQuestion === 0}
-                className="py-3 px-4 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-400"
-              >
-                Previous
-              </button>
-              <button
-                onClick={handleNextQuestion}
-                disabled={!selectedAnswer}
-                className="py-3 px-4 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-400"
-              >
-                {currentQuestion + 1 === quizData.quiz.length ? "Finish Quiz" : "Next"}
-              </button>
-            </div>
+            {Object.keys(quizData).length > 0 && ( // Check if quizData is not empty
+              <>
+                <div className="mb-6">
+                  <h2 className="text-2xl font-bold mb-4">
+                    Question {currentQuestion + 1}/{quizData.quiz.length}
+                  </h2>
+                  <div className="text-lg">{quizData.quiz[currentQuestion].question}</div>
+                </div>
+                <div className="space-y-4">
+                  {quizData.quiz[currentQuestion].options.map((option, index) => (
+                    <button
+                      key={index}
+                      className={`w-full py-3 px-4 text-left bg-gray-200 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded-md ${
+                        selectedAnswer === option ? "bg-indigo-300" : ""
+                      }`}
+                      onClick={() => handleAnswerClick(option)}
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex justify-between mt-6">
+                  <button
+                    onClick={handlePreviousQuestion}
+                    disabled={currentQuestion === 0}
+                    className="py-3 px-4 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-400"
+                  >
+                    Previous
+                  </button>
+                  <button
+                    onClick={handleNextQuestion}
+                    disabled={!selectedAnswer}
+                    className="py-3 px-4 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-400"
+                  >
+                    {currentQuestion + 1 === quizData.quiz.length ? "Finish Quiz" : "Next"}
+                  </button>
+                </div>
+              </>
+            )}
           </>
         )}
       </div>
