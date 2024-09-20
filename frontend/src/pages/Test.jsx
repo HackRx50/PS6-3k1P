@@ -5,14 +5,20 @@ function Test() {
   const [taskId, setTaskId] = useState(null);
   const [taskStatus, setTaskStatus] = useState('');
 
-  
+
+  useEffect(()=>{
+    localStorage.getItem('ttvTaskId') && setTaskId(localStorage.getItem('ttvTaskId'))
+  }, [])
+
   const startTask = async () => {
     try {
       const response = await axios.post('http://localhost:8000/start-task');
       setTaskId(response.data.task_id);
+      localStorage.setItem('ttvTaskId', response.data.task_id)
       setTaskStatus('Task started...');
     } catch (error) {
       console.error('Error starting task:', error);
+      localStorage.removeItem('ttvTaskId')
     }
   };
 
@@ -26,11 +32,12 @@ function Test() {
           );
           setTaskStatus(statusResponse.data.status);
 
-          
-          if (statusResponse.data.status === 'completed') {
+          if (statusResponse.data.status === 'Done') {
             clearInterval(interval);
+            localStorage.removeItem('ttvTaskId')
           }
         } catch (error) {
+          localStorage.removeItem('ttvTaskId')
           console.error('Error fetching task status:', error);
         }
       }, 2000); 

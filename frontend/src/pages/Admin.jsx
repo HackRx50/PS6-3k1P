@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Navbar from '../components/Navbar';
 
@@ -6,6 +6,37 @@ import Navbar from '../components/Navbar';
 function Admin() {
   const [selectedFile, setSelectedFile] = useState(null)
   const [uploadStatus, setUploadStatus] = useState("")
+
+  const [taskId, setTaskId] = useState(null);
+
+
+  useEffect(()=>{
+    localStorage.getItem('ttvUploadTaskId') && setTaskId(localStorage.getItem('ttvUploadTaskId'))
+  }, [])
+
+  useEffect(() => {
+    if (taskId) {
+      const interval = setInterval(async () => {
+        try {
+          const statusResponse = await axios.get(
+            `http://localhost:8000/check-task-status/${taskId}`
+          );
+          setUploadStatus(statusResponse.data.status);
+
+          if (statusResponse.data.status === 'Done') {
+            clearInterval(interval);
+            localStorage.removeItem('ttvUploadTaskId')
+          }
+        } catch (error) {
+          localStorage.removeItem('ttvUploadTaskId')
+          console.error('Error fetching task status:', error);
+        }
+      }, 5000); 
+
+      return () => clearInterval(interval); 
+    }
+  }, [taskId]);
+
 
   const handleFileChange = e => {
     setSelectedFile(e.target.files[0])
@@ -28,20 +59,17 @@ function Admin() {
       })
 
       if (response.status === 200) {
-        setUploadStatus("PDF uploaded successfully!")
+        setTaskId(response.data.task_id);
+        localStorage.setItem('ttvUploadTaskId', response.data.task_id)
+        setUploadStatus("PDF uploaded")
       }
     } catch (error) {
+      localStorage.removeItem('ttvUploadTaskId')
       setUploadStatus("Error uploading PDF. Please try again.")
     }
   };
 
-  const navigateToAnalytics = () => {
-    window.location.href = '/analytics';
-  };
 
-  const navigateToHome = () => {
-    window.location.href = '/';
-  };
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-100">
