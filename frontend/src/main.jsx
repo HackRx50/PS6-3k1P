@@ -7,7 +7,7 @@ import Admin from './pages/Admin';
 import App from './App';
 import Quiz from './pages/Quiz';
 import Test from './pages/Test';
-
+import Analytics from './pages/Analytics';
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
@@ -18,6 +18,7 @@ root.render(
           <Route path="/user" element={<User />} />
           <Route path="/admin" element={<Admin />} />  
           <Route path="/test" element={<Test />} />
+          <Route path="/analytics" element={<Analytics />} />  
       </Routes>
     </Router>
   </React.StrictMode>

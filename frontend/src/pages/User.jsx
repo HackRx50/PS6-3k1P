@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useRef } from "react"
 import { useNavigate } from "react-router-dom"
 import ReactPlayer from "react-player"
-import Navbar from "../components/Navbar"
 
-function App() {
+function User() {
   const [videos, setVideos] = useState([])
   const [selectedVideo, setSelectedVideo] = useState(null)
   const [showQuizButton, setShowQuizButton] = useState(false)
@@ -49,10 +48,11 @@ function App() {
 
   const handleTakeQuiz = () => {
     // Passing analytics data (pause count, play time) to the quiz component
-    navigate("/quiz", {
-      state: { pauseCount, playTime },
-    })
-  }
+    navigate('/quiz', {
+      state: { selectedVideo, pauseCount, playTime }
+    });
+  };
+
 
   const handleSelectVideo = video => {
     setSelectedVideo(video)
@@ -61,10 +61,9 @@ function App() {
     setPlayTime(0)
     setLastPlayTime(0)
   }
+
   return (
     <div className="flex flex-col min-h-screen">
-      <Navbar />
-
       <div className="flex-grow flex flex-col items-center justify-center bg-gray-100 p-8">
         <h1 className="text-3xl font-bold mb-8">Video Library</h1>
 
@@ -113,4 +112,4 @@ function App() {
   )
 }
 
-export default App
+export default User
