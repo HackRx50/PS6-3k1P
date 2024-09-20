@@ -6,6 +6,7 @@ import User from './pages/User';
 import Admin from './pages/Admin';
 import App from './App';
 import Quiz from './pages/Quiz';
+import Test from './pages/Test';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -16,6 +17,7 @@ root.render(
           <Route path='/quiz' element={<Quiz/>}/>
           <Route path="/user" element={<User />} />
           <Route path="/admin" element={<Admin />} />  
+          <Route path="/test" element={<Test />} />
       </Routes>
     </Router>
   </React.StrictMode>
