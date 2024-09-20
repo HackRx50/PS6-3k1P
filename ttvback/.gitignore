@@ -1,0 +1,10 @@
+baj*
+.env
+.history
+__pycache__*
+
+temp_imgs*
+temp_auds*
+vids*
+uploads*
+abc.ipynb

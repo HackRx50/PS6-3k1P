@@ -1,0 +1,317 @@
+[
+  {
+    "videoName": "Loan-Care-Brochure.mp4",
+    "quiz": [
+      {
+        "question": "What is Loan Care by Bajaj Allianz designed for?",
+        "options": [
+          "Homeowners",
+          "Loan borrowers",
+          "Car owners",
+          "Pet owners"
+        ],
+        "correctAnswer": "Loan borrowers"
+      },
+      {
+        "question": "What must you do if your policy renewal is received after the grace period?",
+        "options": [
+          "Submit a claim",
+          "Pay a fine",
+          "Submit a fresh application",
+          "Nothing, it's accepted"
+        ],
+        "correctAnswer": "Submit a fresh application"
+      },
+      {
+        "question": "How much notice must Bajaj Allianz provide before canceling your policy?",
+        "options": [
+          "7 days",
+          "15 days",
+          "30 days",
+          "60 days"
+        ],
+        "correctAnswer": "15 days"
+      },
+      {
+        "question": "What is the minimum retention percentage of premium if you cancel your policy?",
+        "options": [
+          "10%",
+          "25%",
+          "50%",
+          "75%"
+        ],
+        "correctAnswer": "25%"
+      },
+      {
+        "question": "Are claims for accidental injuries covered during the grace period?",
+        "options": [
+          "Yes, fully covered",
+          "Yes, partially covered",
+          "No, not covered",
+          "Only with special approval"
+        ],
+        "correctAnswer": "No, not covered"
+      },
+      {
+        "question": "What can you enhance at the time of policy renewal?",
+        "options": [
+          "Your loan amount",
+          "Your credit score",
+          "Sum Insured",
+          "Your monthly premium"
+        ],
+        "correctAnswer": "Sum Insured"
+      },
+      {
+        "question": "What should you do in the event of a claim?",
+        "options": [
+          "Contact your lawyer",
+          "Call a friend",
+          "Contact Bajaj Allianz at 1-800-2095858",
+          "Ignore it"
+        ],
+        "correctAnswer": "Contact Bajaj Allianz at 1-800-2095858"
+      },
+      {
+        "question": "Which of the following is NOT covered by Loan Care?",
+        "options": [
+          "Transportation expenses for remains",
+          "Daily allowance for hospitalization",
+          "Injuries from intoxication",
+          "Children's education benefits"
+        ],
+        "correctAnswer": "Injuries from intoxication"
+      },
+      {
+        "question": "What type of policy can you transfer to Bajaj Allianz's Loan Care?",
+        "options": [
+          "Home insurance",
+          "Personal accident policy",
+          "Health insurance",
+          "Life insurance"
+        ],
+        "correctAnswer": "Personal accident policy"
+      },
+      {
+        "question": "What does the Loan Care policy provide for peace of mind?",
+        "options": [
+          "Free loans",
+          "Comprehensive protection against various risks",
+          "Higher interest rates",
+          "Discounts on premiums"
+        ],
+        "correctAnswer": "Comprehensive protection against various risks"
+      }
+    ]
+  },
+  {
+    "videoName": "extra_care_brochure_final.mp4",
+    "quiz": [
+      {
+        "question": "What is the entry age for the proposer and spouse at Bajaj Allianz?",
+        "options": [
+          "18 to 70 years",
+          "21 to 75 years",
+          "30 to 60 years",
+          "25 to 65 years"
+        ],
+        "correctAnswer": "18 to 70 years"
+      },
+      {
+        "question": "At what age can children be covered as dependents?",
+        "options": [
+          "From birth to 20 years",
+          "From 3 months to 25 years",
+          "From 1 year to 18 years",
+          "From 6 months to 21 years"
+        ],
+        "correctAnswer": "From 3 months to 25 years"
+      },
+      {
+        "question": "What is a key exclusion under the Bajaj Allianz policy?",
+        "options": [
+          "Emergency room visits",
+          "Treatments related to obesity",
+          "Consultation fees",
+          "Prescription drugs"
+        ],
+        "correctAnswer": "Treatments related to obesity"
+      },
+      {
+        "question": "How long is the waiting period for any illness from the policy commencement?",
+        "options": [
+          "15 days",
+          "30 days",
+          "60 days",
+          "90 days"
+        ],
+        "correctAnswer": "30 days"
+      },
+      {
+        "question": "What does a deductible refer to in the Bajaj Allianz policy?",
+        "options": [
+          "Total coverage amount",
+          "The amount paid by the insurer",
+          "The amount the insured must pay before coverage",
+          "The annual premium cost"
+        ],
+        "correctAnswer": "The amount the insured must pay before coverage"
+      },
+      {
+        "question": "What is the range of sum insured options offered by Bajaj Allianz?",
+        "options": [
+          "5 lakhs to 10 lakhs",
+          "10 lakhs to 15 lakhs",
+          "20 lakhs to 30 lakhs",
+          "15 lakhs to 25 lakhs"
+        ],
+        "correctAnswer": "10 lakhs to 15 lakhs"
+      },
+      {
+        "question": "What percentage discount is available for long-term policies of 3 years?",
+        "options": [
+          "2%",
+          "4%",
+          "6%",
+          "8%"
+        ],
+        "correctAnswer": "8%"
+      },
+      {
+        "question": "How long must you inform Bajaj Allianz about a claim after hospitalization?",
+        "options": [
+          "Within 15 days",
+          "Within 30 days",
+          "Within 60 days",
+          "Immediately at admission"
+        ],
+        "correctAnswer": "Within 30 days"
+      },
+      {
+        "question": "What happens to individuals over 56 years regarding medical tests?",
+        "options": [
+          "They have test waivers",
+          "They are required to undergo pre-policy check-ups",
+          "They must pay higher premiums",
+          "They are not eligible for coverage"
+        ],
+        "correctAnswer": "They are required to undergo pre-policy check-ups"
+      },
+      {
+        "question": "Who is Bajaj Allianz a collaboration between?",
+        "options": [
+          "Bajaj Finserv Limited and HDFC",
+          "Bajaj Finserv Limited and SBI",
+          "Bajaj Finserv Limited and Allianz SE",
+          "Bajaj Finserv Limited and ICICI"
+        ],
+        "correctAnswer": "Bajaj Finserv Limited and Allianz SE"
+      }
+    ]
+  },
+  {
+    "videoName": "sankat_mochan_brochure_final.mp4",
+    "quiz": [
+      {
+        "question": "What is the joint venture behind Bajaj Allianz General Insurance Company Limited?",
+        "options": [
+          "Bajaj Finserv Limited and Allianz SE",
+          "Bajaj Finserv Limited and HDFC",
+          "Bajaj Finserv Limited and ICICI",
+          "Bajaj Finserv Limited and SBI"
+        ],
+        "correctAnswer": "Bajaj Finserv Limited and Allianz SE"
+      },
+      {
+        "question": "What does the Sankat Mochan Policy cover?",
+        "options": [
+          "Life insurance only",
+          "Accidental injuries only",
+          "Comprehensive protection including death and disabilities",
+          "Home insurance"
+        ],
+        "correctAnswer": "Comprehensive protection including death and disabilities"
+      },
+      {
+        "question": "What is the age range for individuals eligible for the Sankat Mochan Policy?",
+        "options": [
+          "0 to 18 years",
+          "18 to 65 years",
+          "5 to 25 years",
+          "18 to 75 years"
+        ],
+        "correctAnswer": "18 to 65 years"
+      },
+      {
+        "question": "What is the benefit provided for temporary total disability under the Sankat Mochan Policy?",
+        "options": [
+          "50% of the sum insured",
+          "100% of the sum insured",
+          "A weekly benefit",
+          "No benefit is provided"
+        ],
+        "correctAnswer": "A weekly benefit"
+      },
+      {
+        "question": "What bonus is offered in the event of death or permanent total disability of the proposer?",
+        "options": [
+          "Children's education bonus",
+          "Funeral expenses bonus",
+          "Home loan bonus",
+          "Travel assistance bonus"
+        ],
+        "correctAnswer": "Children's education bonus"
+      },
+      {
+        "question": "What is the free look period for the Sankat Mochan Policy?",
+        "options": [
+          "15 days",
+          "30 days",
+          "45 days",
+          "60 days"
+        ],
+        "correctAnswer": "30 days"
+      },
+      {
+        "question": "What must policyholders do within 30 days of an accident to submit a claim?",
+        "options": [
+          "Call customer service",
+          "Inform Bajaj Allianz in writing",
+          "Visit a local office",
+          "Send an email"
+        ],
+        "correctAnswer": "Inform Bajaj Allianz in writing"
+      },
+      {
+        "question": "What type of conditions are excluded under the Sankat Mochan Policy?",
+        "options": [
+          "Pre-existing conditions",
+          "Chronic illnesses",
+          "All of the above",
+          "None of the above"
+        ],
+        "correctAnswer": "All of the above"
+      },
+      {
+        "question": "How many options are available under the Sankat Mochan Policy?",
+        "options": [
+          "8",
+          "10",
+          "14",
+          "16"
+        ],
+        "correctAnswer": "16"
+      },
+      {
+        "question": "What should policyholders keep updated for better service?",
+        "options": [
+          "Contact and bank details",
+          "Social media profiles",
+          "Home address",
+          "Insurance numbers"
+        ],
+        "correctAnswer": "Contact and bank details"
+      }
+    ]
+  }
+]
