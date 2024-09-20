@@ -5,7 +5,6 @@ function Test() {
   const [taskId, setTaskId] = useState(null);
   const [taskStatus, setTaskStatus] = useState('');
 
-
   useEffect(()=>{
     localStorage.getItem('ttvTaskId') && setTaskId(localStorage.getItem('ttvTaskId'))
   }, [])

@@ -19,7 +19,7 @@ function Admin() {
       const interval = setInterval(async () => {
         try {
           const statusResponse = await axios.get(
-            `http://localhost:8000/check-task-status/${taskId}`
+            `${import.meta.env.VITE_BACKEND_URL}/check-task-status/${taskId}`
           );
           setUploadStatus(statusResponse.data.status);
 
