@@ -5,7 +5,9 @@ function Navbar() {
   return (
     <nav className="bg-indigo-600 p-4">
       <div className="container mx-auto flex justify-between items-center">
-        <div className="text-white text-lg font-semibold">My App</div>
+        <Link
+          to="/"
+          className="text-white text-lg font-semibold">My App</Link>
         <div className="space-x-4">
           <Link
             to="/user"
@@ -17,7 +19,13 @@ function Navbar() {
             to="/admin"
             className="text-white hover:bg-indigo-700 py-2 px-4 rounded transition"
           >
-            Admin
+            Admin Upload
+          </Link>
+          <Link
+            to="/analytics"
+            className="text-white hover:bg-indigo-700 py-2 px-4 rounded transition"
+          >
+            Admin Analytics
           </Link>
         </div>
       </div>

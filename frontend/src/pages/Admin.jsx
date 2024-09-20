@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import Navbar from '../components/Navbar';
 
 
 function Admin() {
@@ -44,25 +45,7 @@ function Admin() {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-100">
-      <nav className="bg-blue-600 p-4 shadow-md">
-        <div className="container mx-auto flex justify-between items-center">
-          <h1 className="text-white text-2xl font-bold">Admin Dashboard</h1>
-          <div>
-            <button
-              onClick={navigateToHome}
-              className="px-4 py-2 bg-green-500 text-white rounded-md mr-2 hover:bg-gray-600 transition duration-300"
-            >
-              Home
-            </button>
-            <button
-              onClick={navigateToAnalytics}
-              className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition duration-300"
-            >
-              Go to Analytics
-            </button>
-          </div>
-        </div>
-      </nav>
+      <Navbar />
 
       <div className="flex-grow flex flex-col items-center justify-center p-6">
         <div className="bg-white shadow-lg rounded-lg p-8 w-full max-w-md">
