@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import Navbar from '../components/navbar'
+import Navbar from '../components/Navbar'
 import 'tailwindcss/tailwind.css'; // Ensure Tailwind CSS is imported
 import { DonutChart } from '@tremor/react'; // Import DonutChart from Tremor
 
