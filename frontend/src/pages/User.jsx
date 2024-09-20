@@ -10,7 +10,6 @@ function User() {
   const [pauseCount, setPauseCount] = useState(0)
   const [playTime, setPlayTime] = useState(0)
   const [lastPlayTime, setLastPlayTime] = useState(0)
-  const [videoUrl, setVideoUrl] = useState(null) // State to store video URL from backend
 
   const playerRef = useRef(null)
   const navigate = useNavigate()

@@ -19,6 +19,30 @@ function Quiz() {
   const [answers, setAnswers] = useState(Array(quizData.quiz.length).fill(null));
 
   useEffect(() => {
+    const fetchQuizData = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/get_quiz`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ video_name: selectedVideo }),
+        });
+        const data = await response.json();
+        // Assuming the response contains the quiz data
+        // Update quizData with the fetched data
+        quizData.quiz = data.quiz; // Update this line based on your data structure
+      } catch (error) {
+        console.error('Error fetching quiz data:', error);
+      }
+    };
+
+    if (selectedVideo) {
+      fetchQuizData();
+    }
+  }, [selectedVideo]);
+
+  useEffect(() => {
     if (showScore) {
       const username = generateRandomUsername();
       const data = {

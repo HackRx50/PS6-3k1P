@@ -8,7 +8,9 @@ import App from './App';
 import Quiz from './pages/Quiz';
 import Test from './pages/Test';
 import Analytics from './pages/Analytics';
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
+
 root.render(
   <React.StrictMode>
     <Router>
