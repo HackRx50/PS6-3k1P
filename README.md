@@ -3,6 +3,8 @@
 Problem Statement: Instant Video Creation Through Text
 Develop an AI system that generates videos based on text inputs such as brochures or PDFs, creates a quiz following the video, and presents analytics on user engagement.
 
+It is deployed here: https://bajaj-ttv.onrender.com/
+
 Team name: 3K1P
 ---
 title: Bajaj Ttv
