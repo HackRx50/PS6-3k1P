@@ -1,58 +1,83 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+"use client"
 
-function Test() {
-  const [taskId, setTaskId] = useState(null);
-  const [taskStatus, setTaskStatus] = useState('');
+import { BarChart } from "../components/BarChart"
 
-  useEffect(()=>{
-    localStorage.getItem('ttvTaskId') && setTaskId(localStorage.getItem('ttvTaskId'))
-  }, [])
+const chartdata = [
+  {
+    date: "Jan 23",
+    SolarPanels: 2890,
+    Inverters: 2338,
+  },
+  {
+    date: "Feb 23",
+    SolarPanels: 2756,
+    Inverters: 2103,
+  },
+  {
+    date: "Mar 23",
+    SolarPanels: 3322,
+    Inverters: 2194,
+  },
+  {
+    date: "Apr 23",
+    SolarPanels: 3470,
+    Inverters: 2108,
+  },
+  {
+    date: "May 23",
+    SolarPanels: 3475,
+    Inverters: 1812,
+  },
+  {
+    date: "Jun 23",
+    SolarPanels: 3129,
+    Inverters: 1726,
+  },
+  {
+    date: "Jul 23",
+    SolarPanels: 3490,
+    Inverters: 1982,
+  },
+  {
+    date: "Aug 23",
+    SolarPanels: 2903,
+    Inverters: 2012,
+  },
+  {
+    date: "Sep 23",
+    SolarPanels: 2643,
+    Inverters: 2342,
+  },
+  {
+    date: "Oct 23",
+    SolarPanels: 2837,
+    Inverters: 2473,
+  },
+  {
+    date: "Nov 23",
+    SolarPanels: 2954,
+    Inverters: 3848,
+  },
+  {
+    date: "Dec 23",
+    SolarPanels: 3239,
+    Inverters: 3736,
+  },
+]
 
-  const startTask = async () => {
-    try {
-      const response = await axios.post('http://localhost:8000/start-task');
-      setTaskId(response.data.task_id);
-      localStorage.setItem('ttvTaskId', response.data.task_id)
-      setTaskStatus('Task started...');
-    } catch (error) {
-      console.error('Error starting task:', error);
-      localStorage.removeItem('ttvTaskId')
-    }
-  };
-
-  
-  useEffect(() => {
-    if (taskId) {
-      const interval = setInterval(async () => {
-        try {
-          const statusResponse = await axios.get(
-            `http://localhost:8000/check-task-status/${taskId}`
-          );
-          setTaskStatus(statusResponse.data.status);
-
-          if (statusResponse.data.status === 'Done') {
-            clearInterval(interval);
-            localStorage.removeItem('ttvTaskId')
-          }
-        } catch (error) {
-          localStorage.removeItem('ttvTaskId')
-          console.error('Error fetching task status:', error);
-        }
-      }, 2000); 
-
-      return () => clearInterval(interval); 
-    }
-  }, [taskId]);
-
+export default function BarChartHero() {
   return (
     <div>
-      <h1>Long Running Task</h1>
-      <button onClick={startTask}>Start Task</button>
-      {taskId && <p>Task ID: {taskId}</p>}
-      <p>Status: {taskStatus}</p>
+      <div className="w-96 p-4 bg-white shadow-md rounded-lg overflow-hidden cursor-pointer hover:shadow-xl transition-shadow">
+        <BarChart
+          className="h-80"
+          data={chartdata}
+          index="date"
+          categories={["SolarPanels", "Inverters"]}
+          valueFormatter={number => `$${Intl.NumberFormat("us").format(number).toString()}`}
+          onValueChange={v => console.log(v)}
+        />
+      </div>
     </div>
-  );
+  )
 }
-
-export default Test;
