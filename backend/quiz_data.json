@@ -313,5 +313,116 @@
         "correctAnswer": "Contact and bank details"
       }
     ]
+  },
+  {
+    "videoName": "uploads\\Hospitalcash_brochure.pdf.mp4",
+    "quiz": [
+      {
+        "question": "What is the entry age for adults at Bajaj Allianz?",
+        "options": [
+          "17 to 60 years",
+          "18 to 65 years",
+          "20 to 70 years",
+          "21 to 75 years"
+        ],
+        "correctAnswer": "18 to 65 years"
+      },
+      {
+        "question": "How long can dependent children be covered under Bajaj Allianz policies?",
+        "options": [
+          "3 months to 18 years",
+          "3 months to 21 years",
+          "1 year to 21 years",
+          "6 months to 21 years"
+        ],
+        "correctAnswer": "3 months to 21 years"
+      },
+      {
+        "question": "What types of payment options are available for Bajaj Allianz policies?",
+        "options": [
+          "Annually, semi-annually, quarterly, and monthly",
+          "Annually, quarterly, and weekly",
+          "Monthly only",
+          "Annually only"
+        ],
+        "correctAnswer": "Annually, semi-annually, quarterly, and monthly"
+      },
+      {
+        "question": "What is the daily cash allowance option NOT offered by Bajaj Allianz?",
+        "options": [
+          "Rs 500",
+          "Rs 1000",
+          "Rs 3000",
+          "Rs 2000"
+        ],
+        "correctAnswer": "Rs 3000"
+      },
+      {
+        "question": "What is the maximum percentage discount available for a 3-year policy?",
+        "options": [
+          "2%",
+          "4%",
+          "6%",
+          "8%"
+        ],
+        "correctAnswer": "8%"
+      },
+      {
+        "question": "How long is the free look period for Bajaj Allianz policies?",
+        "options": [
+          "15 days",
+          "30 days",
+          "45 days",
+          "60 days"
+        ],
+        "correctAnswer": "30 days"
+      },
+      {
+        "question": "Which family members can be covered under a Bajaj Allianz policy?",
+        "options": [
+          "Self and spouse only",
+          "Only children",
+          "Self, spouse, children, grandchildren, parents, siblings, and in-laws",
+          "Only spouse and parents"
+        ],
+        "correctAnswer": "Self, spouse, children, grandchildren, parents, siblings, and in-laws"
+      },
+      {
+        "question": "What must policyholders provide to cancel their policy?",
+        "options": [
+          "30-day notice",
+          "3-day notice",
+          "7-day written notice",
+          "No notice required"
+        ],
+        "correctAnswer": "7-day written notice"
+      },
+      {
+        "question": "How can you contact Bajaj Allianz for queries?",
+        "options": [
+          "Email only",
+          "Toll-free numbers",
+          "Visit in person only",
+          "Social media only"
+        ],
+        "correctAnswer": "Toll-free numbers"
+      },
+      {
+        "question": "What is NOT covered during the waiting period according to Bajaj Allianz policies?",
+        "options": [
+          "General hospital expenses",
+          "Treatment related to pre-existing conditions",
+          "Accidental injuries",
+          "Regular check-ups"
+        ],
+        "correctAnswer": "Treatment related to pre-existing conditions"
+      }
+    ]
+  },
+  {
+    "videoName": "abc.mp4.mp4",
+    "quiz": {
+      "asdf": "asdf"
+    }
   }
 ]
