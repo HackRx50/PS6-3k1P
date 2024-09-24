@@ -21,7 +21,7 @@ def generate_image_from_text(prompt):
 
     headers = {"Authorization": "Bearer " + os.environ['FLUX_API_KEY']}
     data = {
-        "inputs": "Soft Animation Stype. "+prompt,
+        "inputs": "Soft Animation Style. "+prompt,
         "parameters": {
             "height": 400, "width": 800
         }
