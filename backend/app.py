@@ -21,7 +21,7 @@ from pydantic import BaseModel
 import uuid  
 import json
 
-from functions import create_video, long_task
+from functions import *
 from pydantic import BaseModel
 
 
@@ -209,12 +209,14 @@ async def get_quiz(quiz_request: QuizRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail="Error reading quiz data")
 
-def function_one():
+def function_one(a):
+    print(a)
     for i in range(5):
         print(f"Function One - Count: {i}")
         time.sleep(1)
 
-def function_two():
+def function_two(b):
+    print(b)
     for i in range(5):
         print(f"Function Two - Count: {i}")
         time.sleep(1)
@@ -223,11 +225,17 @@ def function_two():
 @app.get("/run-tasks")
 def run_tasks():
     # Use ThreadPoolExecutor to run functions concurrently
+    results = []
     
     with ThreadPoolExecutor(max_workers=2) as executor:
-        executor.submit(function_one)
-        executor.submit(function_two)
+        future1 = executor.submit(gen_and_save_image, "A car driving on mars", "temp_imgs/a")
+        future2 = executor.submit(gen_and_save_audio, "A dog on mars", "temp_imgs/b")
+        
+        # Collect results
+        results.append(future1.result())  # Get result from the first task
+        results.append(future2.result())  # Get result from the second task
     
+    print(results)
     return {"message": "Tasks are running concurrently"}
 
 if __name__ == '__main__':

@@ -12,6 +12,24 @@ from PIL import Image
 import time
 
 
+def gen_and_save_image(prompt, here):
+    image_bytes = generate_image_from_text(prompt)
+    dataBytesIO = io.BytesIO(image_bytes)
+    img = Image.open(dataBytesIO)
+    img.save(f"{here}.png")
+
+def gen_and_save_audio(script, file_path):
+    client = OpenAI()
+
+    response = client.audio.speech.create(
+        model="tts-1",
+        voice="shimmer",
+        input=script
+    )
+
+    with open(f'{file_path}.mp3', 'wb') as f:
+        f.write(response.content)
+
 def generate_image_from_text(prompt):
     prompt = prompt + " araminta_illus illustration style"
     
@@ -190,14 +208,8 @@ def create_video(file_path: str, task_id: str, tsm: list):
     for i, page in enumerate(pages):
         tsm[0][task_id] = f"Generaing Audio {i+1} of {N}"
         
-        response = client.audio.speech.create(
-            model="tts-1",
-            voice="shimmer",
-            input=page["Script"]
-        )
+        gen_and_save_audio(page['Script'], f'{AUDS_FOLDER}/{i}')
 
-        with open(f'{AUDS_FOLDER}/{i}.mp3', 'wb') as f:
-            f.write(response.content)
 
     tsm[0][task_id] = "Combining Images & video"
     print("\n", "combining audio and video")
@@ -232,6 +244,7 @@ def create_video(file_path: str, task_id: str, tsm: list):
     print("\n", "done!!!")
 
     return
+
 
 def upload_to_s3(name):
     s3 = boto3.client('s3')
