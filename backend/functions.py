@@ -125,10 +125,12 @@ async def create_video(file_path: str, task_id: str, tsm: list):
     pages = parsed_slides
 
     print("\n", "pages", pages)
+    
     script_compiled=""
-    print("\n", "getting image prompts")
     for i, page in enumerate(pages):
         script_compiled=script_compiled+page["Script"]
+    
+    for i, page in enumerate(pages):
         completion = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
@@ -137,7 +139,7 @@ async def create_video(file_path: str, task_id: str, tsm: list):
             ]
         )
         ans = completion.choices[0].message.content
-        page["image"] = ans
+        pages[i]["image"] = ans
 
 
     ## Create quiz 
@@ -175,25 +177,23 @@ async def create_video(file_path: str, task_id: str, tsm: list):
 
     N = len(pages)
 
-    # creating images from prompts for all pages
+    PostScriptTasks = []  
     for i, page in enumerate(pages):
         try:
-            print(page["image"])
-            tsm[0][task_id] = f"Generating Image {i+1} of {N}"
+            # print(page["image"])
+            # tsm[0][task_id] = f"Generating Image {i+1} of {N}"
 
-            # Use gen_and_save_image instead of manual image generation
-            await gen_and_save_image(page["image"], f"{IMGS_FOLDER}/{i}")
+            # image
+            PostScriptTasks.append(gen_and_save_image(page["image"], f"{IMGS_FOLDER}/{i}"))
+            # audio
+            PostScriptTasks.append(gen_and_save_audio(page['Script'], f'{AUDS_FOLDER}/{i}'))
         except Exception as e:
             return e
 
-    tsm[0][task_id] = "Generating Images Done."
-    print("\n", "getting audios")
-    
-    # all audios from scripts
-    for i, page in enumerate(pages):
-        # tsm[0][task_id] = f"Generaing Audio {i+1} of {N}"
+    await asyncio.gather(*PostScriptTasks)  
 
-        await gen_and_save_audio(page['Script'], f'{AUDS_FOLDER}/{i}')
+    tsm[0][task_id] = "Generating Images & Audio Done."
+    print("\n", "got images and audio")
 
 
     tsm[0][task_id] = "Combining Images & video"
@@ -229,7 +229,7 @@ async def create_video(file_path: str, task_id: str, tsm: list):
     print("\n", "done!!!")
     
     END_TIME = time.time()
-    print("Time taken: ", START_TIME-END_TIME)
+    print("Time taken: ", END_TIME-START_TIME)
 
     return
 
