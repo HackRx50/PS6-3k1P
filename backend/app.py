@@ -1,3 +1,4 @@
+from concurrent.futures import ThreadPoolExecutor
 from fastapi import Depends, FastAPI, UploadFile, File, HTTPException
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -5,6 +6,8 @@ from sqlalchemy import create_engine, Column, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 import os
+import time
+import threading
 
 import boto3
 from botocore.exceptions import NoCredentialsError
@@ -206,6 +209,26 @@ async def get_quiz(quiz_request: QuizRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail="Error reading quiz data")
 
+def function_one():
+    for i in range(5):
+        print(f"Function One - Count: {i}")
+        time.sleep(1)
+
+def function_two():
+    for i in range(5):
+        print(f"Function Two - Count: {i}")
+        time.sleep(1)
+
+
+@app.get("/run-tasks")
+def run_tasks():
+    # Use ThreadPoolExecutor to run functions concurrently
+    
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        executor.submit(function_one)
+        executor.submit(function_two)
+    
+    return {"message": "Tasks are running concurrently"}
 
 if __name__ == '__main__':
     import uvicorn
