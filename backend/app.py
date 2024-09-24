@@ -8,6 +8,7 @@ from sqlalchemy.orm import sessionmaker, Session
 import os
 import time
 import threading
+import asyncio
 
 import boto3
 from botocore.exceptions import NoCredentialsError
@@ -189,7 +190,6 @@ async def start_task(background_tasks: BackgroundTasks):
     background_tasks.add_task(long_task, task_id, task_status_memory)
     return {"task_id": task_id}
 
-
 class QuizRequest(BaseModel):
     video_name: str
 
@@ -209,34 +209,16 @@ async def get_quiz(quiz_request: QuizRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail="Error reading quiz data")
 
-def function_one(a):
-    print(a)
-    for i in range(5):
-        print(f"Function One - Count: {i}")
-        time.sleep(1)
+@app.post("/async-test")
+async def async_test(n: int):
+    async def delayed_print(id):
+        await asyncio.sleep(3)  # 3 seconds delay
+        print(f"Process ID: {id}")
 
-def function_two(b):
-    print(b)
-    for i in range(5):
-        print(f"Function Two - Count: {i}")
-        time.sleep(1)
-
-
-@app.get("/run-tasks")
-def run_tasks():
-    # Use ThreadPoolExecutor to run functions concurrently
-    results = []
+    tasks = [delayed_print(i) for i in range(n)]
+    await asyncio.gather(*tasks)
     
-    with ThreadPoolExecutor(max_workers=2) as executor:
-        future1 = executor.submit(gen_and_save_image, "A car driving on mars", "temp_imgs/a")
-        future2 = executor.submit(gen_and_save_audio, "A dog on mars", "temp_imgs/b")
-        
-        # Collect results
-        results.append(future1.result())  # Get result from the first task
-        results.append(future2.result())  # Get result from the second task
-    
-    print(results)
-    return {"message": "Tasks are running concurrently"}
+    return {"message": f"{n} processes created and completed."}
 
 if __name__ == '__main__':
     import uvicorn

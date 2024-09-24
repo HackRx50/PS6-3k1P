@@ -4,24 +4,25 @@ import os
 
 import boto3
 import requests
-from dotenv import main
 from moviepy.editor import AudioFileClip, ImageClip, concatenate_videoclips
 from openai import OpenAI
 from pdfminer.high_level import extract_text
 from PIL import Image
 import time
+import asyncio
 
 
-def gen_and_save_image(prompt, here):
-    image_bytes = generate_image_from_text(prompt)
+async def gen_and_save_image(prompt, file_path):
+    image_bytes = await asyncio.to_thread(generate_image_from_text, prompt)  # Await the synchronous function
     dataBytesIO = io.BytesIO(image_bytes)
     img = Image.open(dataBytesIO)
-    img.save(f"{here}.png")
+    img.save(f"{file_path}.png")
 
-def gen_and_save_audio(script, file_path):
+async def gen_and_save_audio(script, file_path):
     client = OpenAI()
 
-    response = client.audio.speech.create(
+    # Run the synchronous call in a separate thread
+    response = await asyncio.to_thread(client.audio.speech.create,
         model="tts-1",
         voice="shimmer",
         input=script
