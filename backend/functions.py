@@ -47,68 +47,53 @@ def generate_image_from_text(prompt):
     }
 
     try:
-        # Sending the request to Hugging Face API
         response = requests.post(
             API_URL, headers=headers, json=data, timeout=300)
 
-        # Handling successful request (status code 200)
         if response.status_code == 200:
             print("Image generation successful!")
-            # Returning the image bytes
             return response.content
         else:
-            # Handling the case of non-200 response
             print(f"Error: {response.status_code}, {response.text}")
-            # Returning error message in bytes
             error_message = f"Error {response.status_code}: {response.text}"
-            return error_message.encode('utf-8')  # Encoding error as bytes
+            return error_message.encode('utf-8')  
     except Exception as e:
-        # Handling any other unexpected errors (like network issues)
         print(f"An error occurred: {e}")
-        # Return error message in bytes
         return f"An error occurred: {e}".encode('utf-8')
 
 
 def combine_audio_and_video(name):
 
-    # Define the folders for audios and images
     audio_folder = "temp_auds"
     image_folder = "temp_imgs"
 
-    # Get the list of audio and image files
     audio_files = sorted([f for f in os.listdir(audio_folder) if f.endswith('.mp3') or f.endswith('.wav')])
     image_files = sorted([f for f in os.listdir(image_folder) if f.endswith('.png')])
 
     video_clips = []
 
-    # Iterate over each audio and corresponding image
     for idx, audio_file in enumerate(audio_files):
         audio_path = os.path.join(audio_folder, audio_file)
         image_path = os.path.join(image_folder, f'{idx}.png')
         
-        # Load audio and get its duration
         audio_clip = AudioFileClip(audio_path)
         
-        # Load image and set duration equal to audio duration
         image_clip = ImageClip(image_path).set_duration(audio_clip.duration)
         
-        # Combine the image and audio into a video clip
         video_clip = image_clip.set_audio(audio_clip)
         
-        # Append the video clip to the list
         video_clips.append(video_clip)
 
-    # Concatenate all video clips into one final video
     final_video = concatenate_videoclips(video_clips)
 
-    # Save the final video to a file
     output_path = 'vids/' + name + '.mp4'
     final_video.write_videofile(output_path, fps=24)
 
     print("Video created successfully!")
 
 
-def create_video(file_path: str, task_id: str, tsm: list):
+async def create_video(file_path: str, task_id: str, tsm: list):
+    START_TIME = time.time()
     
     name = os.path.basename(file_path).split(".")[0]
     
@@ -195,10 +180,9 @@ def create_video(file_path: str, task_id: str, tsm: list):
         try:
             print(page["image"])
             tsm[0][task_id] = f"Generating Image {i+1} of {N}"
-            image_bytes = generate_image_from_text(page["image"])
-            dataBytesIO = io.BytesIO(image_bytes)
-            img = Image.open(dataBytesIO)
-            img.save(f"{IMGS_FOLDER}/{i}.png")
+
+            # Use gen_and_save_image instead of manual image generation
+            await gen_and_save_image(page["image"], f"{IMGS_FOLDER}/{i}")
         except Exception as e:
             return e
 
@@ -207,9 +191,9 @@ def create_video(file_path: str, task_id: str, tsm: list):
     
     # all audios from scripts
     for i, page in enumerate(pages):
-        tsm[0][task_id] = f"Generaing Audio {i+1} of {N}"
-        
-        gen_and_save_audio(page['Script'], f'{AUDS_FOLDER}/{i}')
+        # tsm[0][task_id] = f"Generaing Audio {i+1} of {N}"
+
+        await gen_and_save_audio(page['Script'], f'{AUDS_FOLDER}/{i}')
 
 
     tsm[0][task_id] = "Combining Images & video"
@@ -243,6 +227,9 @@ def create_video(file_path: str, task_id: str, tsm: list):
  
     tsm[0][task_id] = "Done"
     print("\n", "done!!!")
+    
+    END_TIME = time.time()
+    print("Time taken: ", START_TIME-END_TIME)
 
     return
 
