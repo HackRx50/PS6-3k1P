@@ -110,6 +110,32 @@ function Quiz() {
               <p className="text-lg">Number of pauses: {pauseCount}</p>
               <p className="text-lg">Total time video played: {playTime} seconds</p>
             </div>
+            <div className="mt-6">
+              <h3 className="text-2xl font-bold">Quiz Review</h3>
+              <div className="space-y-4">
+                {quizData.quiz.map((question, index) => (
+                  <div key={index} className="p-4 bg-gray-100 rounded-lg shadow-md">
+                    <p className="text-lg font-semibold mb-2">Question {index + 1}: {question.question}</p>
+                    <div className="space-y-2">
+                      {question.options.map((option, optIndex) => (
+                        <div
+                          key={optIndex}
+                          className={`p-2 rounded-md ${
+                            option === question.correctAnswer
+                              ? 'bg-green-200'
+                              : option === answers[index] && option !== question.correctAnswer
+                              ? 'bg-red-200'
+                              : 'bg-white'
+                          }`}
+                        >
+                          {option}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
             <button
               onClick={() => navigate('/')}
               className="mt-6 py-3 px-4 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
