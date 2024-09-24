@@ -13,7 +13,7 @@ const Analytics = () => {
       .then(response => response.json())
       .then(data => {
         console.log(data)
-        setData(data) // Store data in state
+        setData(data)
       })
       .catch(error => console.error("Error fetching data:", error))
   }, [])
@@ -168,7 +168,7 @@ const Analytics = () => {
         )}
       </div>
     </div>
-  )
-}
+  );
+};
 
 export default Analytics

@@ -4,13 +4,32 @@ import os
 
 import boto3
 import requests
-from dotenv import main
 from moviepy.editor import AudioFileClip, ImageClip, concatenate_videoclips
 from openai import OpenAI
 from pdfminer.high_level import extract_text
 from PIL import Image
 import time
+import asyncio
 
+
+async def gen_and_save_image(prompt, file_path):
+    image_bytes = await asyncio.to_thread(generate_image_from_text, prompt)  # Await the synchronous function
+    dataBytesIO = io.BytesIO(image_bytes)
+    img = Image.open(dataBytesIO)
+    img.save(f"{file_path}.png")
+
+async def gen_and_save_audio(script, file_path):
+    client = OpenAI()
+
+    # Run the synchronous call in a separate thread
+    response = await asyncio.to_thread(client.audio.speech.create,
+        model="tts-1",
+        voice="shimmer",
+        input=script
+    )
+
+    with open(f'{file_path}.mp3', 'wb') as f:
+        f.write(response.content)
 
 def generate_image_from_text(prompt):
     prompt = prompt + " araminta_illus illustration style"
@@ -21,7 +40,7 @@ def generate_image_from_text(prompt):
 
     headers = {"Authorization": "Bearer " + os.environ['FLUX_API_KEY']}
     data = {
-        "inputs": "Soft Animation Stype. "+prompt,
+        "inputs": "Soft Animation Style. "+prompt,
         "parameters": {
             "height": 400, "width": 800
         }
@@ -190,14 +209,8 @@ def create_video(file_path: str, task_id: str, tsm: list):
     for i, page in enumerate(pages):
         tsm[0][task_id] = f"Generaing Audio {i+1} of {N}"
         
-        response = client.audio.speech.create(
-            model="tts-1",
-            voice="shimmer",
-            input=page["Script"]
-        )
+        gen_and_save_audio(page['Script'], f'{AUDS_FOLDER}/{i}')
 
-        with open(f'{AUDS_FOLDER}/{i}.mp3', 'wb') as f:
-            f.write(response.content)
 
     tsm[0][task_id] = "Combining Images & video"
     print("\n", "combining audio and video")
@@ -232,6 +245,7 @@ def create_video(file_path: str, task_id: str, tsm: list):
     print("\n", "done!!!")
 
     return
+
 
 def upload_to_s3(name):
     s3 = boto3.client('s3')

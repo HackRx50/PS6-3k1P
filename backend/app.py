@@ -1,3 +1,4 @@
+from concurrent.futures import ThreadPoolExecutor
 from fastapi import Depends, FastAPI, UploadFile, File, HTTPException
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -5,6 +6,9 @@ from sqlalchemy import create_engine, Column, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 import os
+import time
+import threading
+import asyncio
 
 import boto3
 from botocore.exceptions import NoCredentialsError
@@ -18,7 +22,7 @@ from pydantic import BaseModel
 import uuid  
 import json
 
-from functions import create_video, long_task
+from functions import *
 from pydantic import BaseModel
 
 
@@ -186,7 +190,6 @@ async def start_task(background_tasks: BackgroundTasks):
     background_tasks.add_task(long_task, task_id, task_status_memory)
     return {"task_id": task_id}
 
-
 class QuizRequest(BaseModel):
     video_name: str
 
@@ -206,6 +209,16 @@ async def get_quiz(quiz_request: QuizRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail="Error reading quiz data")
 
+@app.post("/async-test")
+async def async_test(n: int):
+    async def delayed_print(id):
+        await asyncio.sleep(3)  # 3 seconds delay
+        print(f"Process ID: {id}")
+
+    tasks = [delayed_print(i) for i in range(n)]
+    await asyncio.gather(*tasks)
+    
+    return {"message": f"{n} processes created and completed."}
 
 if __name__ == '__main__':
     import uvicorn

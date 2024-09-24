@@ -1,9 +1,26 @@
-from PIL import Image
-import io
-from functions import generate_image_from_text
+import asyncio
+from functions import *
+from dotenv import load_dotenv  # Correct import
+import os
+import time
 
-image_bytes = generate_image_from_text("Soft Anime Style. Two hands shaking in agreement with a city skyline in the background, representing a strong and trustworthy partnership.")
+load_dotenv()
 
-dataBytesIO = io.BytesIO(image_bytes)
-img = Image.open(dataBytesIO)
-img.save(f"abc.jpg")
+
+async def wait(t):
+    await asyncio.sleep(t)
+    print(t, 'done')
+
+
+async def main():
+    s = time.time()
+    await asyncio.gather(
+        gen_and_save_image("4 balls in water", "temp_imgs/a"),
+        gen_and_save_image("3 balls in water", "temp_imgs/b"),
+        # gen_and_save_audio("A boat driving on mars", "temp_imgs/b")
+    )
+    e = time.time()
+    print(e-s)
+
+if __name__ == "__main__":
+    asyncio.run(main())
