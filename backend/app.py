@@ -1,23 +1,18 @@
 import asyncio
 import json
 import os
-import threading
-import time
 import uuid
-from concurrent.futures import ThreadPoolExecutor
 
 import boto3
 from botocore.exceptions import NoCredentialsError
+from database import *
 from dotenv import main
 from fastapi import (BackgroundTasks, Depends, FastAPI, File, HTTPException,
                      UploadFile)
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse
 from functions import *
-from pydantic import BaseModel
-from sqlalchemy import Column, Integer, String, create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.orm import Session
 
 main.load_dotenv()
 
@@ -46,43 +41,8 @@ s3_bucket = 'bajttv'
 s3_client = boto3.client('s3')
 
 
-DATABASE_URL = "sqlite:///./test.db"
-engine = create_engine(DATABASE_URL)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = declarative_base()
-
-
 # task status memory list because mutable, and can be passed as reference
 task_status_memory = [{}]
-
-
-class UserData(BaseModel):
-    username: str
-    vid_name: str
-    score: int
-    pause_count: int
-    play_time: int
-
-
-class UserDataDB(Base):
-    __tablename__ = "user_data"
-    id = Column(Integer, primary_key=True, index=True)
-    username = Column(String, index=True)
-    vid_name = Column(String, index=True)
-    score = Column(Integer)
-    pause_count = Column(Integer)
-    play_time = Column(Integer)
-
-
-Base.metadata.create_all(bind=engine)
-
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 @app.post('/submit_data')
@@ -116,18 +76,19 @@ async def upload_pdf(background_tasks: BackgroundTasks, pdf: UploadFile = File(.
         buffer.write(await pdf.read())
 
     # create_video(file_path)
-    
+
     task_id = str(uuid.uuid4())
     task_status_memory[0][task_id] = "PDF Uploaded"
-    
+
     # background_tasks.add_task(long_task, task_id, task_status_memory)
     try:
-        background_tasks.add_task(create_video, file_path, task_id, task_status_memory)
+        background_tasks.add_task(
+            create_video, file_path, task_id, task_status_memory)
     except Exception as e:
         raise HTTPException(
             status_code=500, detail="Someting wrong with generation."
         )
-    
+
     return {"task_id": task_id}
 
     # return {"message": "PDF uploaded successfully", "file": pdf.filename}
@@ -137,7 +98,7 @@ async def upload_pdf(background_tasks: BackgroundTasks, pdf: UploadFile = File(.
 async def get_videos():
 
     try:
-        
+
         response = s3_client.list_objects_v2(Bucket=s3_bucket)
         files = [obj['Key'] for obj in response.get('Contents', [])]
         return files
@@ -150,7 +111,7 @@ async def get_videos():
 async def get_video(filename: str):
 
     try:
-        
+
         if not os.path.exists("vids/" + filename):
             s3_client.download_file(s3_bucket, filename, "vids/" + filename)
         return FileResponse("vids/" + filename)
@@ -183,24 +144,25 @@ async def start_task(background_tasks: BackgroundTasks):
     background_tasks.add_task(long_task, task_id, task_status_memory)
     return {"task_id": task_id}
 
-class QuizRequest(BaseModel):
-    video_name: str
 
 @app.post("/get_quiz")
 async def get_quiz(quiz_request: QuizRequest):
     try:
         with open('quiz_data.json') as f:
             quiz_data = json.load(f)
-        
+
         # Search for the quiz corresponding to the video_name
-        quiz = next((item['quiz'] for item in quiz_data if item['videoName'] == quiz_request.video_name), None)
-        
+        quiz = next((item['quiz'] for item in quiz_data if item['videoName']
+                    == quiz_request.video_name), None)
+
         if quiz is None:
-            raise HTTPException(status_code=404, detail="Quiz not found for the given video name")
+            raise HTTPException(
+                status_code=404, detail="Quiz not found for the given video name")
 
         return {"quiz": quiz}
     except Exception as e:
         raise HTTPException(status_code=500, detail="Error reading quiz data")
+
 
 @app.post("/async-test")
 async def async_test(n: int):
@@ -210,7 +172,7 @@ async def async_test(n: int):
 
     tasks = [delayed_print(i) for i in range(n)]
     await asyncio.gather(*tasks)
-    
+
     return {"message": f"{n} processes created and completed."}
 
 if __name__ == '__main__':
