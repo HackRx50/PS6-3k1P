@@ -6,7 +6,7 @@ import Navbar from "../components/Navbar";
 function User() {
   const [videos, setVideos] = useState([]);
   const [selectedVideo, setSelectedVideo] = useState(null);
-  const [showQuizButton, setShowQuizButton] = useState(false);
+  const [showQuizButton, setShowQuizButton] = useState(true);
   const [pauseCount, setPauseCount] = useState(0);
   const [playTime, setPlayTime] = useState(0);
   const [playing, setPlaying] = useState(false);
@@ -22,7 +22,7 @@ function User() {
   }, []);
 
   const handleVideoEnd = () => {
-    setShowQuizButton(true);
+    // setShowQuizButton(true);
     setPlaying(false);
   };
 
@@ -32,7 +32,7 @@ function User() {
   };
 
   const handlePlay = () => {
-    setShowQuizButton(false);
+    // setShowQuizButton(false);
     setPlaying(true);
   };
 
@@ -53,7 +53,7 @@ function User() {
 
   const handleSelectVideo = (video) => {
     setSelectedVideo(video);
-    setShowQuizButton(false);
+    // setShowQuizButton(false);
     setPauseCount(0);
     setPlayTime(0);
     setPlaying(false);
