@@ -19,6 +19,7 @@ Base = declarative_base()
 class QuizRequest(BaseModel):
     video_name: str
 
+
 class UserData(BaseModel):
     username: str
     vid_name: str
@@ -35,6 +36,14 @@ class UserDataDB(Base):
     score = Column(Integer)
     pause_count = Column(Integer)
     play_time = Column(Integer)
+
+class QuizDataDB(Base):
+    __tablename__ = "quiz_data"
+    id = Column(Integer, primary_key=True, index=True)
+    video_name = Column(String, index=True)
+    question = Column(String)
+    options = Column(String)  # Store options as a JSON string
+    correct_answer = Column(String)
 
 Base.metadata.create_all(bind=engine)
 

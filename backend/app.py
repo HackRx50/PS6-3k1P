@@ -73,9 +73,7 @@ async def upload_pdf(background_tasks: BackgroundTasks, pdf: UploadFile = File(.
 
 @app.get('/get_videos')
 async def get_videos():
-
     try:
-
         response = s3_client.list_objects_v2(Bucket=s3_bucket)
         files = [obj['Key'] for obj in response.get('Contents', [])]
         return files
@@ -86,9 +84,7 @@ async def get_videos():
 
 @app.get('/get_video/{filename}')
 async def get_video(filename: str):
-
     try:
-
         if not os.path.exists("vids/" + filename):
             s3_client.download_file(s3_bucket, filename, "vids/" + filename)
         return FileResponse("vids/" + filename)
@@ -122,18 +118,17 @@ async def submit_data(data: UserData, db: Session = Depends(get_db)):
 
 
 @app.post("/get_quiz")
-async def get_quiz(quiz_request: QuizRequest):
+async def get_quiz(quiz_request: QuizRequest, db: Session = Depends(get_db)):  # Add db dependency
     try:
-        with open('quiz_data.json') as f:
-            quiz_data = json.load(f)
+        # Query the database for the quiz corresponding to the video_name
+        quiz_data = db.query(QuizDataDB).filter(QuizDataDB.video_name == quiz_request.video_name).all()
 
-        # Search for the quiz corresponding to the video_name
-        quiz = next((item['quiz'] for item in quiz_data if item['videoName']
-                    == quiz_request.video_name), None)
-
-        if quiz is None:
+        if not quiz_data:
             raise HTTPException(
                 status_code=404, detail="Quiz not found for the given video name")
+
+        # Format the quiz data to return
+        quiz = [{"question": item.question, "options": json.loads(item.options), "correctAnswer": item.correct_answer} for item in quiz_data]
 
         return {"quiz": quiz}
     except Exception as e:

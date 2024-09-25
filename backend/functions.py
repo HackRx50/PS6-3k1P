@@ -6,6 +6,7 @@ import time
 
 import boto3
 import requests
+from database import *
 from moviepy.editor import AudioFileClip, ImageClip, concatenate_videoclips
 from openai import OpenAI
 from pdfminer.high_level import extract_text
@@ -33,7 +34,7 @@ async def gen_and_save_audio(script, file_path):
     with open(f'{file_path}.mp3', 'wb') as f:
         f.write(response.content)
 
-async def gen_and_save_quiz(script_compiled, file_path):
+async def gen_and_save_quiz(script_compiled, name):
     ## Create quiz 
     print("\n", "Generating and Saving Quiz")
     
@@ -45,9 +46,9 @@ async def gen_and_save_quiz(script_compiled, file_path):
     quiz_ans = quiz_ans.split("json")[1]
     quiz_ans = quiz_ans.replace("\n", "")
 
-    parsed_quiz_ans = json.loads(quiz_ans)
+    parsed_quiz_data = json.loads(quiz_ans)
     
-    upload_quiz_data(parsed_quiz_ans, file_path)
+    upload_quiz_data(parsed_quiz_data, name)
 
 def generate_image_from_text(prompt):
     prompt = prompt + " araminta_illus illustration style"
@@ -134,7 +135,7 @@ async def create_video(file_path: str, task_id: str, tsm: list):
     
     tsm[0][task_id] = "Generating Quiz"
     print("\n", "Generating Quiz")
-    await gen_and_save_quiz(script_compiled, file_path)
+    await gen_and_save_quiz(script_compiled, name)
 
     print('\n', "clearing temp folders")
     await clear_temp_folders()
@@ -181,25 +182,27 @@ async def upload_to_s3(name):
     except NoCredentialsError:
         print("Credentials not available.")
 
-async def upload_quiz_data(parsed_quiz_ans, file_path):
-    ## 0.01 sec
-    with open('quiz_data.json', 'r') as file:
-        quiz_data = json.load(file)
+async def upload_quiz_data(parsed_quiz_data, name):
+    full_name = f"{name}.mp4"
 
-    new_quiz_data = {
-        "videoName": f"{file_path}.mp4",  
-        "quiz": parsed_quiz_ans  
-    }
+    db = next(get_db())  # Get a database session
+    existing_quiz = db.query(QuizDataDB).filter(QuizDataDB.video_name == full_name).first()
 
-    for video in quiz_data:
-        if video["videoName"] == new_quiz_data["videoName"]:
-            video["quiz"] = new_quiz_data["quiz"]  
-            break
+    if existing_quiz:
+        return
     else:
-        quiz_data.append(new_quiz_data)
-
-    with open('quiz_data.json', 'w') as file:
-        json.dump(quiz_data, file, indent=2)
+        # Create a new record
+        for qns in parsed_quiz_data['quiz']:
+            print(qns)
+            quiz_data_entry = QuizDataDB(
+                video_name=full_name,
+                question=qns['question'],  # Store as JSON string
+                options=json.dumps(qns['options']),  # Placeholder for options
+                correct_answer=qns['correctAnswer']  # Placeholder for correct answer
+            )
+            db.add(quiz_data_entry)
+    db.commit()  # Save changes
+    db.close()  # Close the session
 
 async def combine_audio_and_video(name):
 

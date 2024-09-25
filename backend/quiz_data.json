@@ -315,7 +315,7 @@
     ]
   },
   {
-    "videoName": "uploads\\Hospitalcash_brochure.pdf.mp4",
+    "videoName": "Hospitalcash_brochure.pdf.mp4",
     "quiz": [
       {
         "question": "What is the entry age for adults at Bajaj Allianz?",
@@ -418,11 +418,5 @@
         "correctAnswer": "Treatment related to pre-existing conditions"
       }
     ]
-  },
-  {
-    "videoName": "abc.mp4.mp4",
-    "quiz": {
-      "asdf": "asdf"
-    }
   }
 ]
