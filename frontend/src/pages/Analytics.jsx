@@ -54,7 +54,8 @@ const Analytics = () => {
   const curData = data && selectedVidName ? groupByVidName(data)[selectedVidName] : []
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gradient-to-r from-blue-50 to-blue-100">
+
       <Navbar />
       <div className="container mx-auto p-4">
         {data ? (

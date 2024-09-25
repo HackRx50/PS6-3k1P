@@ -1,11 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-const generateRandomUsername = () => {
-  const adjectives = ["happy", "lucky", "sunny", "clever", "swift"];
-  const nouns = ["cat", "dog", "bird", "fish", "fox"];
-  return `${adjectives[Math.floor(Math.random() * adjectives.length)]}${nouns[Math.floor(Math.random() * nouns.length)]}`;
-};
+
 
 function Quiz() {
   const location = useLocation();
@@ -44,8 +40,8 @@ function Quiz() {
   }, [selectedVideo]);
 
   useEffect(() => {
-    if (showScore) {
-      const username = generateRandomUsername();
+    const username = localStorage.getItem('username')
+    if (showScore && username) {
       const data = {
         username,
         vid_name: selectedVideo,
@@ -99,7 +95,7 @@ function Quiz() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-50 to-blue-100">
       <div className="w-full max-w-xl p-8 bg-white shadow-lg rounded-lg">
         {showScore ? (
           <div className="text-center">

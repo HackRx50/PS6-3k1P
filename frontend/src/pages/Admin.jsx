@@ -72,7 +72,8 @@ function Admin() {
 
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-100">
+    <div className="min-h-screen bg-gradient-to-r from-blue-50 to-blue-100">
+
       <Navbar />
 
       <div className="flex-grow flex flex-col items-center justify-center p-6">
