@@ -244,3 +244,12 @@ async def clear_temp_folders():
         os.makedirs(AUDS_FOLDER)
     print('done')
     return
+
+def prepare_folders():
+    UPLOAD_FOLDER = 'uploads'
+    if not os.path.exists(UPLOAD_FOLDER):
+        os.makedirs(UPLOAD_FOLDER)
+
+    VIDEO_FOLDER = 'vids'
+    if not os.path.exists(VIDEO_FOLDER):
+        os.makedirs(VIDEO_FOLDER)

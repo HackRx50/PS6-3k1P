@@ -28,15 +28,6 @@ app.add_middleware(
 )
 
 
-UPLOAD_FOLDER = 'uploads'
-if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER)
-
-
-VIDEO_FOLDER = 'vids'
-if not os.path.exists(VIDEO_FOLDER):
-    os.makedirs(VIDEO_FOLDER)
-
 s3_bucket = 'bajttv'
 s3_client = boto3.client('s3')
 
@@ -45,22 +36,7 @@ s3_client = boto3.client('s3')
 task_status_memory = [{}]
 
 
-@app.post('/submit_data')
-async def submit_data(data: UserData, db: Session = Depends(get_db)):
-    new_data = UserDataDB(
-        username=data.username,
-        vid_name=data.vid_name,
-        score=data.score,
-        pause_count=data.pause_count,
-        play_time=data.play_time
-    )
-    db.add(new_data)
-    db.commit()
-    db.refresh(new_data)
-    return {"message": "Data submitted successfully", "data": new_data}
-
-
-@app.get('/hello')
+@app.get('/')
 async def hello():
     return {"message": "Hello from the server!"}
 
@@ -71,6 +47,7 @@ async def upload_pdf(background_tasks: BackgroundTasks, pdf: UploadFile = File(.
         raise HTTPException(
             status_code=400, detail="Invalid file type. Only PDFs are allowed.")
 
+    UPLOAD_FOLDER = 'uploads'
     file_path = os.path.join(UPLOAD_FOLDER, pdf.filename)
     with open(file_path, "wb") as buffer:
         buffer.write(await pdf.read())
@@ -129,20 +106,19 @@ async def get_all_data(db: Session = Depends(get_db)):
     return data
 
 
-@app.get("/check-task-status/{task_id}")
-async def check_task_status(task_id: str):
-    status = task_status_memory[0].get(task_id)
-    if status is None:
-        raise HTTPException(status_code=404, detail="Task not found")
-    return {"status": status}
-
-
-@app.post("/start-task")
-async def start_task(background_tasks: BackgroundTasks):
-    task_id = str(uuid.uuid4())
-    task_status_memory[0][task_id] = "Creating Video"
-    background_tasks.add_task(long_task, task_id, task_status_memory)
-    return {"task_id": task_id}
+@app.post('/submit_data')
+async def submit_data(data: UserData, db: Session = Depends(get_db)):
+    new_data = UserDataDB(
+        username=data.username,
+        vid_name=data.vid_name,
+        score=data.score,
+        pause_count=data.pause_count,
+        play_time=data.play_time
+    )
+    db.add(new_data)
+    db.commit()
+    db.refresh(new_data)
+    return {"message": "Data submitted successfully", "data": new_data}
 
 
 @app.post("/get_quiz")
@@ -164,16 +140,13 @@ async def get_quiz(quiz_request: QuizRequest):
         raise HTTPException(status_code=500, detail="Error reading quiz data")
 
 
-@app.post("/async-test")
-async def async_test(n: int):
-    async def delayed_print(id):
-        await asyncio.sleep(3)  # 3 seconds delay
-        print(f"Process ID: {id}")
+@app.get("/check-task-status/{task_id}")
+async def check_task_status(task_id: str):
+    status = task_status_memory[0].get(task_id)
+    if status is None:
+        raise HTTPException(status_code=404, detail="Task not found")
+    return {"status": status}
 
-    tasks = [delayed_print(i) for i in range(n)]
-    await asyncio.gather(*tasks)
-
-    return {"message": f"{n} processes created and completed."}
 
 if __name__ == '__main__':
     import uvicorn
