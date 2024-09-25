@@ -15,6 +15,7 @@ from functions import *
 from sqlalchemy.orm import Session
 
 load_dotenv()
+prepare_folders()
 
 app = FastAPI()
 
