@@ -6,7 +6,7 @@ import uuid
 import boto3
 from botocore.exceptions import NoCredentialsError
 from database import *
-from dotenv import main
+from dotenv import load_dotenv
 from fastapi import (BackgroundTasks, Depends, FastAPI, File, HTTPException,
                      UploadFile)
 from fastapi.middleware.cors import CORSMiddleware
@@ -14,7 +14,7 @@ from fastapi.responses import FileResponse
 from functions import *
 from sqlalchemy.orm import Session
 
-main.load_dotenv()
+load_dotenv()
 
 app = FastAPI()
 
