@@ -1,9 +1,10 @@
 import asyncio
-from functions import *
-from dotenv import load_dotenv
 import os
-from openai import OpenAI
 import time
+
+from dotenv import load_dotenv
+from functions import *
+from openai import OpenAI
 
 load_dotenv()
 
