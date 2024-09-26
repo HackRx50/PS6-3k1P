@@ -47,8 +47,9 @@ async def gen_and_save_quiz(script_compiled, name):
     quiz_ans = quiz_ans.replace("\n", "")
 
     parsed_quiz_data = json.loads(quiz_ans)
+    print("pp", parsed_quiz_data)
     
-    upload_quiz_data(parsed_quiz_data, name)
+    await upload_quiz_data(parsed_quiz_data, name)
 
 def generate_image_from_text(prompt):
     prompt = prompt + " araminta_illus illustration style"
@@ -185,24 +186,27 @@ async def upload_to_s3(name):
 async def upload_quiz_data(parsed_quiz_data, name):
     full_name = f"{name}.mp4"
 
-    db = next(get_db())  # Get a database session
-    existing_quiz = db.query(QuizDataDB).filter(QuizDataDB.video_name == full_name).first()
+    try:
+        db = next(get_db())  # Get a database session
+        existing_quiz = db.query(QuizDataDB).filter(QuizDataDB.video_name == full_name).first()
 
-    if existing_quiz:
-        return
-    else:
-        # Create a new record
-        for qns in parsed_quiz_data['quiz']:
-            print(qns)
-            quiz_data_entry = QuizDataDB(
-                video_name=full_name,
-                question=qns['question'],  # Store as JSON string
-                options=json.dumps(qns['options']),  # Placeholder for options
-                correct_answer=qns['correctAnswer']  # Placeholder for correct answer
-            )
-            db.add(quiz_data_entry)
-    db.commit()  # Save changes
-    db.close()  # Close the session
+        if existing_quiz:
+            return
+        else:
+            # Create a new record
+            for qns in parsed_quiz_data:
+                print(qns)
+                quiz_data_entry = QuizDataDB(
+                    video_name=full_name,
+                    question=qns['question'],  # Store as JSON string
+                    options=json.dumps(qns['options']),  # Placeholder for options
+                    correct_answer=qns['correctAnswer']  # Placeholder for correct answer
+                )
+                db.add(quiz_data_entry)
+        db.commit()  # Save changes
+        db.close()  # Close the session
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
 async def combine_audio_and_video(name):
 
