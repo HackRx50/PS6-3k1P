@@ -11,6 +11,7 @@ It is deployed here: <https://bajaj-ttv.onrender.com/>
 
 ## Sample Videos Genarated
 
-<https://github.com/user-attachments/assets/431a0858-d13c-46aa-bb45-1f398d1e8603>
 
-<https://github.com/user-attachments/assets/2aa8a119-1b79-42ae-89f8-a3a3c24e2272>
+https://github.com/user-attachments/assets/0ff3a8a6-7e07-43a1-90d1-22085e2ea021
+
+
