@@ -1,8 +1,8 @@
 "use client"
 
-import React, { useState, useEffect, useRef } from "react";
-import ReactPlayer from "react-player";
 import { useRouter } from 'next/navigation';
+import { useEffect, useRef, useState } from "react";
+import ReactPlayer from "react-player";
 
 function User() {
   const [videos, setVideos] = useState([]);
@@ -71,7 +71,7 @@ function User() {
           <div className="w-full max-w-2xl bg-white shadow-2xl rounded-lg overflow-hidden mb-8">
             <ReactPlayer
               ref={playerRef}
-              url={`${import.meta.env.VITE_BACKEND_URL}/get_video/${selectedVideo}`}
+              url={`/get_video/${selectedVideo}`}
               playing={playing}
               controls={true}
               onEnded={handleVideoEnd}
@@ -104,7 +104,7 @@ function User() {
             >
               <div className="aspect-w-16 aspect-h-9 bg-gray-200">
                 {/* <img
-                  src={`${import.meta.env.VITE_BACKEND_URL}/get_thumbnail/${video}`}
+                  src={`/get_thumbnail/${video}`}
                   alt={`${video} thumbnail`}
                   className="w-full h-full object-cover"
                 /> */}

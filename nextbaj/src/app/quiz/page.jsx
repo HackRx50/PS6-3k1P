@@ -1,7 +1,6 @@
 "use client"
 
-import React, { useState, useEffect } from 'react';
-
+import { useEffect, useState } from 'react';
 
 function Quiz() {
   const location = useLocation();
@@ -17,7 +16,7 @@ function Quiz() {
   useEffect(() => {
     const fetchQuizData = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/get_quiz`, {
+        const response = await fetch(`/get_quiz`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -49,7 +48,7 @@ function Quiz() {
         pause_count: pauseCount,
         play_time: playTime,
       };
-      fetch(`${import.meta.env.VITE_BACKEND_URL}/submit_data`, {
+      fetch(`/submit_data`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
