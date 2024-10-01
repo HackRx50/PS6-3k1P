@@ -3,6 +3,7 @@ import io
 import json
 import os
 import time
+import subprocess
 
 import boto3
 import requests
@@ -91,7 +92,7 @@ async def chat_completion(prompt):
     )
     return completion.choices[0].message.content
 
-async def get_main_content(pdf_content):    
+async def get_main_content(pdf_content):
     prompt = pdf_content + "\n\n" + "Break down the content into around 10 slides/pages and provide script for each slide. It must be in a json with just 2 keys, Script and Title, nothing else"
     
     ans = await chat_completion(prompt)
@@ -236,6 +237,20 @@ async def combine_audio_and_video(name):
     final_video.write_videofile(output_path, fps=24)
 
     print("Video created successfully!")
+
+def add_subtitle(input_file, subtitle_file, output_file):
+    # FFmpeg command to add subtitles to the input video
+    ffmpeg_command = [
+        "ffmpeg",
+        "-i", input_file,                # Input video file
+        "-vf", f"subtitles={subtitle_file}",  # Add subtitles from the SRT file
+        "-c:v", "libx264",               # Video codec (H.264)
+        "-c:a", "copy",                  # Copy audio without re-encoding
+        output_file
+    ]
+
+    # Run the FFmpeg command
+    subprocess.run(ffmpeg_command)
 
 async def clear_temp_folders():
     if os.path.exists(IMGS_FOLDER):
