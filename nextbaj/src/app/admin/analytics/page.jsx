@@ -1,16 +1,16 @@
 "use client"
 
-import React, { useEffect, useState } from "react"
-import "tailwindcss/tailwind.css" // Ensure Tailwind CSS is imported
 import { BarChart } from "@/components/BarChart"
 import { DonutChart } from "@/components/DonutChart"
+import React, { useEffect, useState } from "react"
+import "tailwindcss/tailwind.css"; // Ensure Tailwind CSS is imported
 
 const Analytics = () => {
   const [data, setData] = useState(null) // State to store fetched data
   const [selectedVidName, setSelectedVidName] = useState(null) // State to track selected video
 
   useEffect(() => {
-    fetch(`/get_all_data`)
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/get_all_data`)
       .then(response => response.json())
       .then(data => {
         console.log(data)

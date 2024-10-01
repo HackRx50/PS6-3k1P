@@ -17,7 +17,7 @@ function User() {
   const router = useRouter();
 
   useEffect(() => {
-    fetch(`/get_videos`)
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/get_videos`)
       .then((response) => response.json())
       .then((data) => setVideos(data))
       .catch((error) => console.error("Error fetching videos:", error));

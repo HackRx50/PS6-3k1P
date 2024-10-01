@@ -16,7 +16,7 @@ function Quiz() {
   useEffect(() => {
     const fetchQuizData = async () => {
       try {
-        const response = await fetch(`/get_quiz`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/get_quiz`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -48,7 +48,7 @@ function Quiz() {
         pause_count: pauseCount,
         play_time: playTime,
       };
-      fetch(`/submit_data`, {
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/submit_data`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

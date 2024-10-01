@@ -16,7 +16,7 @@ function Admin() {
     if (taskId) {
       const interval = setInterval(async () => {
         try {
-          const statusResponse = await fetch(`/check-task-status/${taskId}`)
+          const statusResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/check-task-status/${taskId}`)
           const data = await statusResponse.json()
           setUploadStatus(data.status)
 
@@ -48,15 +48,15 @@ function Admin() {
     formData.append("pdf", selectedFile)
 
     try {
-      const response = await axios.post("/upload_pdf", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/upload_pdf`, {
+        method: "POST",
+        body: formData,
       })
 
-      if (response.status === 200) {
-        setTaskId(response.data.task_id)
-        localStorage.setItem("ttvUploadTaskId", response.data.task_id)
+      if (response.ok) {
+        const data = await response.json()
+        setTaskId(data.task_id)
+        localStorage.setItem("ttvUploadTaskId", data.task_id)
         setUploadStatus("PDF uploaded")
       }
     } catch (error) {
