@@ -144,6 +144,21 @@ async def check_task_status(task_id: str):
     return {"status": status}
 
 
+@app.get("/test_caps")
+async def test_caps(vid: str):
+    video = "vids/"+vid+".mp4"
+    out = "vids/"+vid+"_caps.mp4"
+    caps = "tmp/subtitles.srt"
+    
+    try:
+        add_subtitle(video, caps, out)
+        await upload_to_s3(vid+"_caps")
+    except Exception as e:
+        print(e)
+        return e
+    return {"status": "done"}
+
+
 if __name__ == '__main__':
     import uvicorn
     uvicorn.run(app, host="127.0.0.1", port=8000, log_level="info")

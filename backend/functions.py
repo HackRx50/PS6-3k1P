@@ -242,6 +242,7 @@ def add_subtitle(input_file, subtitle_file, output_file):
     # FFmpeg command to add subtitles to the input video
     ffmpeg_command = [
         "ffmpeg",
+        "-y",                            # Overwrite output files without asking
         "-i", input_file,                # Input video file
         "-vf", f"subtitles={subtitle_file}",  # Add subtitles from the SRT file
         "-c:v", "libx264",               # Video codec (H.264)
