@@ -2,8 +2,9 @@ import asyncio
 import io
 import json
 import os
-import time
+import re
 import subprocess
+import time
 
 import boto3
 import requests
@@ -12,6 +13,7 @@ from moviepy.editor import AudioFileClip, ImageClip, concatenate_videoclips
 from openai import OpenAI
 from pdfminer.high_level import extract_text
 from PIL import Image
+from pydub.utils import mediainfo
 
 IMGS_FOLDER = 'temp_imgs'
 AUDS_FOLDER = 'temp_auds'
@@ -157,7 +159,10 @@ async def create_video(file_path: str, task_id: str, tsm: list):
 
     tsm[0][task_id] = "Combining Images & video"
     print("\n", "combining audio and video")
-    await combine_audio_and_video(name)
+    await combine_audio_and_video(name+"_t")
+    
+    gen_and_save_srt(pages, name)
+    add_subtitle(f'vids/{name}_t.mp4', f'tmp/{name}.srt', f'vids/{name}.mp4')
 
     tsm[0][task_id] = "Uploading the video"
     print("\n", "uploading the video")
@@ -276,3 +281,41 @@ def prepare_folders():
     VIDEO_FOLDER = 'vids'
     if not os.path.exists(VIDEO_FOLDER):
         os.makedirs(VIDEO_FOLDER)
+
+def format_time(s):
+    hours = int(s // 3600)
+    minutes = int((s % 3600) // 60)
+    seconds = int(s % 60)
+    milliseconds = int((s - int(s)) * 1000)
+    return f"{hours:02}:{minutes:02}:{seconds:02},{milliseconds:03}"
+
+def get_audio_length(file_path):
+    audio_info = mediainfo(file_path)
+    return float(audio_info['duration'])
+
+def gen_and_save_srt(scripts, name):
+    cumulative_time_ms = 0  
+    srt_entry_number = 1  
+    srt_file_path = f'tmp/{name}.srt'  
+
+    with open(srt_file_path, 'w') as srt_file:  
+        for i in range(len(scripts)):
+            
+            sentences = re.split(r'(?<=[,.])\s*', scripts[i]['Script'])
+            
+            audio_length = get_audio_length(f'temp_auds/{i}.mp3') * 1000  
+            total_script_length = len(scripts[i]['Script'])  
+            
+            for sentence in sentences:
+                sentence_length = len(sentence)  
+                
+                caption_duration_ms = (sentence_length / total_script_length) * audio_length
+                
+                start_time_ms = cumulative_time_ms
+                end_time_ms = start_time_ms + caption_duration_ms
+                
+                srt_entry = f"{srt_entry_number}\n{format_time(start_time_ms / 1000)} --> {format_time(end_time_ms / 1000)}\n{sentence}\n\n"
+                srt_file.write(srt_entry)  
+                srt_entry_number += 1  
+                
+                cumulative_time_ms += caption_duration_ms
