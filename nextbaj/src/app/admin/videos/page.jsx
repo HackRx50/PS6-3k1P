@@ -82,8 +82,7 @@ function User() {
           description: "Uploaded from my app",
           keywords: "video,upload",
           category: "22",
-          privacyStatus: "private",
-          redirect_uris: [`http://127.0.0.1:8000/oauth2callback`]
+          privacyStatus: "private"
         }),
       });
 
