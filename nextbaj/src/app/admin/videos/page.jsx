@@ -71,7 +71,7 @@ function User() {
     if (!selectedVideo) return;
     
     try {
-      const response = await fetch(`http://127.0.0.1:8000/publish_to_youtube`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL_YT}/publish_to_youtube`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
