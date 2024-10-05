@@ -48,11 +48,15 @@ function User() {
   };
 
   const handleTakeQuiz = () => {
-    router.push({
-      pathname: '/quiz',
-      query: { selectedVideo, pauseCount, playTime },
-    });
+    const videoName = selectedVideo; // place this with actual logic
+  
+    // Manually constructing the path string
+    const quizUrl = `/quiz?video_name=${encodeURIComponent(videoName)}`;
+    
+    router.push(quizUrl); // Navigating to the quiz page with video name in the query string
   };
+  
+  
 
   const handleSelectVideo = (video) => {
     setSelectedVideo(video);
@@ -71,7 +75,7 @@ function User() {
           <div className="w-full max-w-2xl bg-white shadow-2xl rounded-lg overflow-hidden mb-8">
             <ReactPlayer
               ref={playerRef}
-              url={`/get_video/${selectedVideo}`}
+              url={`${process.env.NEXT_PUBLIC_API_URL}/get_video/${selectedVideo}`}
               playing={playing}
               controls={true}
               onEnded={handleVideoEnd}

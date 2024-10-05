@@ -2,6 +2,7 @@ import asyncio
 import json
 import os
 import uuid
+from fastapi import Query
 
 import boto3
 from botocore.exceptions import NoCredentialsError
@@ -103,26 +104,27 @@ async def get_all_data(db: Session = Depends(get_db)):
     return data
 
 
-@app.post('/submit_data')
-async def submit_data(data: UserData, db: Session = Depends(get_db)):
-    new_data = UserDataDB(
-        username=data.username,
-        vid_name=data.vid_name,
-        score=data.score,
-        pause_count=data.pause_count,
-        play_time=data.play_time
-    )
-    db.add(new_data)
-    db.commit()
-    db.refresh(new_data)
-    return {"message": "Data submitted successfully", "data": new_data}
+# @app.post('/submit_data')
+# async def submit_data(data: UserData, db: Session = Depends(get_db)):
+#     new_data = UserDataDB(
+#         username=data.username,
+#         vid_name=data.vid_name,
+#         score=data.score,
+#         pause_count=data.pause_count,
+#         play_time=data.play_time
+#     )
+#     db.add(new_data)
+#     db.commit()
+#     db.refresh(new_data)
+#     return {"message": "Data submitted successfully", "data": new_data}
 
 
-@app.post("/get_quiz")
-async def get_quiz(quiz_request: QuizRequest, db: Session = Depends(get_db)):  # Add db dependency
+
+@app.get("/get_quiz")
+async def get_quiz(video_name: str = Query(...), db: Session = Depends(get_db)):  # Take video_name from query parameters
     try:
         # Query the database for the quiz corresponding to the video_name
-        quiz_data = db.query(QuizDataDB).filter(QuizDataDB.video_name == quiz_request.video_name).all()
+        quiz_data = db.query(QuizDataDB).filter(QuizDataDB.video_name == video_name).all()
 
         if not quiz_data:
             raise HTTPException(
@@ -136,12 +138,51 @@ async def get_quiz(quiz_request: QuizRequest, db: Session = Depends(get_db)):  #
         raise HTTPException(status_code=500, detail="Error reading quiz data")
 
 
+
 @app.get("/check-task-status/{task_id}")
 async def check_task_status(task_id: str):
     status = task_status_memory[0].get(task_id)
     if status is None:
         raise HTTPException(status_code=404, detail="Task not found")
     return {"status": status}
+
+
+class VideoData(BaseModel):
+    username: str
+    vid_name: str
+    pause_count: int
+    play_time: float
+
+@app.post('/submit_video_data')
+async def submit_video_data(data: VideoData, db: Session = Depends(get_db)):  # New route for pause_count and play_time
+    new_data = UserDataDB(
+        username=data.username,
+        vid_name=data.vid_name,
+        pause_count=data.pause_count,
+        play_time=data.play_time
+    )
+    db.add(new_data)
+    db.commit()
+    db.refresh(new_data)
+    return {"message": "Video data submitted successfully", "data": new_data}
+
+
+class ScoreData(BaseModel):
+    username: str
+    vid_name: str
+    score: int
+
+@app.post('/submit_score_data')
+async def submit_score_data(data: ScoreData, db: Session = Depends(get_db)):  # New route for score
+    new_data = UserDataDB(
+        username=data.username,
+        vid_name=data.vid_name,
+        score=data.score
+    )
+    db.add(new_data)
+    db.commit()
+    db.refresh(new_data)
+    return {"message": "Score data submitted successfully", "data": new_data}
 
 
 if __name__ == '__main__':
