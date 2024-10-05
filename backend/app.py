@@ -133,6 +133,7 @@ async def get_quiz(quiz_request: QuizRequest, db: Session = Depends(get_db)):  #
 
         return {"quiz": quiz}
     except Exception as e:
+        print(e)
         raise HTTPException(status_code=500, detail="Error reading quiz data")
 
 
