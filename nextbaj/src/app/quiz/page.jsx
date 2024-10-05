@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation"; // Import useSearchParams for query params
+import { useEffect, useState } from "react";
 import Navbar from "../../components/Navbar";
 
 export default function UserQuiz() {
@@ -18,7 +18,7 @@ export default function UserQuiz() {
   useEffect(() => {
     console.log("Video Name:", video_name); // Log the video name
     if (video_name) {
-      fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/get_quiz?video_name=${video_name}`)
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/get_quiz?video_name=${video_name}`)
         .then((response) => {
           if (!response.ok) {
             throw new Error('Network response was not ok');
@@ -69,7 +69,7 @@ export default function UserQuiz() {
     };
 
     try {
-      await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/submit_score_data`, {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/submit_score_data`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
