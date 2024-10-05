@@ -135,6 +135,7 @@ async def get_quiz(video_name: str = Query(...), db: Session = Depends(get_db)):
 
         return {"quiz": quiz}
     except Exception as e:
+        print(e)
         raise HTTPException(status_code=500, detail="Error reading quiz data")
 
 
@@ -146,12 +147,6 @@ async def check_task_status(task_id: str):
         raise HTTPException(status_code=404, detail="Task not found")
     return {"status": status}
 
-
-class VideoData(BaseModel):
-    username: str
-    vid_name: str
-    pause_count: int
-    play_time: float
 
 @app.post('/submit_video_data')
 async def submit_video_data(data: VideoData, db: Session = Depends(get_db)):  # New route for pause_count and play_time
@@ -167,10 +162,7 @@ async def submit_video_data(data: VideoData, db: Session = Depends(get_db)):  # 
     return {"message": "Video data submitted successfully", "data": new_data}
 
 
-class ScoreData(BaseModel):
-    username: str
-    vid_name: str
-    score: int
+
 
 @app.post('/submit_score_data')
 async def submit_score_data(data: ScoreData, db: Session = Depends(get_db)):  # New route for score

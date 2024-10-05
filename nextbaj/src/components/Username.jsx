@@ -31,7 +31,7 @@ const Username = () => {
   };
 
   return (
-    <div>
+    <div className='text-black'>
       <span>{username}</span>
       <button onClick={handleEdit} aria-label="Edit username">
         ✏️
