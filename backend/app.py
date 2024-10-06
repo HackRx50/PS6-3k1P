@@ -8,7 +8,6 @@ import uuid
 from fastapi import Query
 
 import boto3
-import httplib2
 from botocore.exceptions import NoCredentialsError
 from database import *
 from dotenv import load_dotenv
