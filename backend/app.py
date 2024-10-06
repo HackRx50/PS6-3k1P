@@ -1,7 +1,11 @@
 import asyncio
+import http.client as httplib
 import json
 import os
+import random
+import time
 import uuid
+from fastapi import Query
 
 import boto3
 from botocore.exceptions import NoCredentialsError
@@ -11,14 +15,15 @@ from fastapi import (BackgroundTasks, Depends, FastAPI, Query, File, Form,
                      HTTPException, UploadFile)
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
-from functions import *
 from sqlalchemy.orm import Session
+
+from utils.functions import *
+from utils.youtube import *
 
 load_dotenv()
 prepare_folders()
 
 app = FastAPI()
-
 
 app.add_middleware(
     CORSMiddleware,
@@ -28,10 +33,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 s3_bucket = 'bajttv'
 s3_client = boto3.client('s3')
-
 
 # task status memory list because mutable, and can be passed as reference
 task_status_memory = [{}]
@@ -40,7 +43,6 @@ task_status_memory = [{}]
 @app.get('/')
 async def hello():
     return {"message": "Hello from the server!"}
-
 
 @app.post('/upload_pdf')
 async def upload_pdf(background_tasks: BackgroundTasks, pdf: UploadFile = File(...)):
@@ -53,18 +55,15 @@ async def upload_pdf(background_tasks: BackgroundTasks, pdf: UploadFile = File(.
     with open(file_path, "wb") as buffer:
         buffer.write(await pdf.read())
 
-    # create_video(file_path)
-
     task_id = str(uuid.uuid4())
     task_status_memory[0][task_id] = "PDF Uploaded"
 
-    # background_tasks.add_task(long_task, task_id, task_status_memory)
     try:
         background_tasks.add_task(
             create_video, file_path, task_id, task_status_memory)
     except Exception as e:
         raise HTTPException(
-            status_code=500, detail="Someting wrong with generation."
+            status_code=500, detail="Something wrong with generation."
         )
 
     return {"task_id": task_id}
@@ -135,46 +134,44 @@ async def get_video(filename: str):
         print(e)
         raise HTTPException(status_code=404, detail="File not found")
 
-
 @app.get('/get_all_data')
 async def get_all_data(db: Session = Depends(get_db)):
     data = db.query(UserDataDB).all()
     return data
 
 
-@app.post('/submit_data')
-async def submit_data(data: UserData, db: Session = Depends(get_db)):
-    new_data = UserDataDB(
-        username=data.username,
-        vid_name=data.vid_name,
-        score=data.score,
-        pause_count=data.pause_count,
-        play_time=data.play_time
-    )
-    db.add(new_data)
-    db.commit()
-    db.refresh(new_data)
-    return {"message": "Data submitted successfully", "data": new_data}
+# @app.post('/submit_data')
+# async def submit_data(data: UserData, db: Session = Depends(get_db)):
+#     new_data = UserDataDB(
+#         username=data.username,
+#         vid_name=data.vid_name,
+#         score=data.score,
+#         pause_count=data.pause_count,
+#         play_time=data.play_time
+#     )
+#     db.add(new_data)
+#     db.commit()
+#     db.refresh(new_data)
+#     return {"message": "Data submitted successfully", "data": new_data}
 
 
-@app.post("/get_quiz")
-async def get_quiz(quiz_request: QuizRequest, db: Session = Depends(get_db)):  # Add db dependency
+
+@app.get("/get_quiz")
+async def get_quiz(video_name: str = Query(...), db: Session = Depends(get_db)):  # Take video_name from query parameters
     try:
         # Query the database for the quiz corresponding to the video_name
-        quiz_data = db.query(QuizDataDB).filter(QuizDataDB.video_name == quiz_request.video_name).all()
+        quiz_data = db.query(QuizDataDB).filter(QuizDataDB.video_name == video_name).all()
 
         if not quiz_data:
             raise HTTPException(
                 status_code=404, detail="Quiz not found for the given video name")
 
-        # Format the quiz data to return
         quiz = [{"question": item.question, "options": json.loads(item.options), "correctAnswer": item.correct_answer} for item in quiz_data]
 
         return {"quiz": quiz}
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail="Error reading quiz data")
-
 
 @app.get("/check-task-status/{task_id}")
 async def check_task_status(task_id: str):
@@ -183,20 +180,42 @@ async def check_task_status(task_id: str):
         raise HTTPException(status_code=404, detail="Task not found")
     return {"status": status}
 
-
-@app.get("/test_caps")
-async def test_caps(vid: str):
-    video = "vids/"+vid+".mp4"
-    out = "vids/"+vid+"_caps.mp4"
-    caps = "tmp/subtitles.srt"
-    
+@app.post("/publish_to_youtube")
+async def publish_to_youtube(request: dict):
     try:
-        add_subtitle(video, caps, out)
-        await upload_to_s3(vid+"_caps")
+        youtube = get_authenticated_service()
+        video_id = initialize_upload(youtube, request)
+        return {"message": "Video uploaded successfully", "video_id": video_id}
     except Exception as e:
-        print(e)
-        return e
-    return {"status": "done"}
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post('/submit_video_data')
+async def submit_video_data(data: VideoData, db: Session = Depends(get_db)):  # New route for pause_count and play_time
+    new_data = UserDataDB(
+        username=data.username,
+        vid_name=data.vid_name,
+        pause_count=data.pause_count,
+        play_time=data.play_time
+    )
+    db.add(new_data)
+    db.commit()
+    db.refresh(new_data)
+    return {"message": "Video data submitted successfully", "data": new_data}
+
+
+
+
+@app.post('/submit_score_data')
+async def submit_score_data(data: ScoreData, db: Session = Depends(get_db)):  # New route for score
+    new_data = UserDataDB(
+        username=data.username,
+        vid_name=data.vid_name,
+        score=data.score
+    )
+    db.add(new_data)
+    db.commit()
+    db.refresh(new_data)
+    return {"message": "Score data submitted successfully", "data": new_data}
 
 
 if __name__ == '__main__':

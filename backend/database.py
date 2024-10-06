@@ -32,6 +32,17 @@ class UserData(BaseModel):
     pause_count: int
     play_time: int
 
+class ScoreData(BaseModel):
+    username: str
+    vid_name: str
+    score: int
+
+class VideoData(BaseModel):
+    username: str
+    vid_name: str
+    pause_count: int
+    play_time: float
+
 
 class Script(BaseModel):
     Title: str
