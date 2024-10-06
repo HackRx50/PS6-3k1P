@@ -2,7 +2,7 @@
 
 import { useSearchParams } from "next/navigation"; // Import useSearchParams for query params
 import { useEffect, useState } from "react";
-import Navbar from "../../components/Navbar";
+import Navbar from "@/components/Navbar";
 
 export default function UserQuiz() {
   const searchParams = useSearchParams(); // Access search parameters
