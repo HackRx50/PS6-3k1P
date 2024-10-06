@@ -1,5 +1,5 @@
 import httplib2
-
+from http import client as httplib 
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaFileUpload
