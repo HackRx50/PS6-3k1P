@@ -1,5 +1,4 @@
 // Tremor DonutChart [v0.0.1]
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 "use client"
 

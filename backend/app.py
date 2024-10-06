@@ -7,8 +7,8 @@ import boto3
 from botocore.exceptions import NoCredentialsError
 from database import *
 from dotenv import load_dotenv
-from fastapi import (BackgroundTasks, Depends, FastAPI, File, HTTPException,
-                     UploadFile)
+from fastapi import (BackgroundTasks, Depends, FastAPI, Query, File, Form,
+                     HTTPException, UploadFile)
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from functions import *
@@ -72,6 +72,37 @@ async def upload_pdf(background_tasks: BackgroundTasks, pdf: UploadFile = File(.
     # return {"message": "PDF uploaded successfully", "file": pdf.filename}
 
 
+@app.post('/get_script')
+async def get_script(slides: int = Form(...), pdf: UploadFile = File(...)):
+    if not pdf.filename.endswith('.pdf'):
+        raise HTTPException(
+            status_code=400, detail="Invalid file type. Only PDFs are allowed.")
+
+    UPLOAD_FOLDER = 'uploads'
+    file_path = os.path.join(UPLOAD_FOLDER, pdf.filename)
+    with open(file_path, "wb") as buffer:
+        buffer.write(await pdf.read())
+
+    scripts = await get_script_from_pdf(file_path, slides)
+
+    return {"scripts": scripts}
+
+
+@app.post('/generate_image')
+async def get_audios_images(imageRequest: ImageRequest):
+    try:
+        if not imageRequest:
+            raise HTTPException(
+                status_code=400, detail="Invalid request. ImageRequest is required.")
+
+        img_path = await generate_image(imageRequest.script, imageRequest.ind, imageRequest.processId)
+
+        return {"url": img_path}
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=500, detail="Error reading images")
+
+
 @app.get('/get_videos')
 async def get_videos():
     try:
@@ -82,6 +113,14 @@ async def get_videos():
         raise HTTPException(
             status_code=500, detail='Error reading video directory from S3')
 
+
+@app.get('/get_image')
+async def get_image(filename: str = Query(..., description="The name of the image file")):
+    try:
+        return FileResponse("temp_imgs/" + filename)
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=404, detail="File not found")
 
 @app.get('/get_video/{filename}')
 async def get_video(filename: str):

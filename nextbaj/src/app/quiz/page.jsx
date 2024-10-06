@@ -3,9 +3,7 @@
 import { useEffect, useState } from 'react';
 
 function Quiz() {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const { pauseCount, playTime, selectedVideo } = location.state || { pauseCount: 0, playTime: 0, selectedVideo: '' };
+  const { pauseCount, playTime, selectedVideo } = { pauseCount: 0, playTime: 0, selectedVideo: '' };
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
   const [showScore, setShowScore] = useState(false);

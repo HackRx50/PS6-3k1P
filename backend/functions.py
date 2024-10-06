@@ -19,9 +19,14 @@ IMGS_FOLDER = 'temp_imgs'
 AUDS_FOLDER = 'temp_auds'
 
 async def gen_and_save_image(prompt, file_path):
-    image_bytes = await asyncio.to_thread(generate_image_from_text, prompt)
+    image_bytes = await generate_image_from_text(prompt)
     dataBytesIO = io.BytesIO(image_bytes)
     img = Image.open(dataBytesIO)
+    
+    print("Saving image", file_path)
+    folder = os.path.dirname(file_path)
+    if not os.path.exists(folder):
+        os.makedirs(folder)
     img.save(f"{file_path}.png")
 
 async def gen_and_save_audio(script, file_path):
@@ -54,7 +59,7 @@ async def gen_and_save_quiz(script_compiled, name):
     
     await upload_quiz_data(parsed_quiz_data, name)
 
-def generate_image_from_text(prompt):
+async def generate_image_from_text(prompt):
     prompt = prompt + " araminta_illus illustration style"
     
     API_URL = "https://api-inference.huggingface.co/models/black-forest-labs/FLUX.1-dev"
@@ -70,8 +75,7 @@ def generate_image_from_text(prompt):
     }
 
     try:
-        response = requests.post(
-            API_URL, headers=headers, json=data, timeout=300)
+        response = requests.post(API_URL, headers=headers, json=data, timeout=300)
 
         if response.status_code == 200:
             print("Image generation successful!")
@@ -94,9 +98,28 @@ async def chat_completion(prompt):
     )
     return completion.choices[0].message.content
 
-async def get_main_content(pdf_content):
-    prompt = pdf_content + "\n\n" + "Break down the content into around 10 slides/pages and provide script for each slide. It must be in a json with just 2 keys, Script and Title, nothing else"
+async def generate_image(script, ind, processId):
+    try:
+        prompt = "give just a short suitable prompt to give to an image generator as if talking to a 10 year old to create an image for the slide with this content: " + script
+        imp = await chat_completion(prompt)
+        img_prompt = imp.strip('"')
+        
+        img_path = f"temp_imgs/{processId}/{ind}"
+        image = await gen_and_save_image(img_prompt, img_path)
+        return f"{img_path}.png"
+    except Exception as e:
+        print(e)
+        return e
+
+async def get_script_from_pdf(file_path, n):
+    pdf_content = extract_text(file_path)
+    pages = await get_main_content(pdf_content, n)
+    return pages
+
+async def get_main_content(pdf_content, n):
     
+    prompt = pdf_content + "\n\n" + f"Break down the content into {n} slides/pages and provide script for each slide. It must be a json list of objects with just 2 keys, Script and Title, nothing else"
+
     ans = await chat_completion(prompt)
     
     ans = ans.strip("```")
@@ -104,6 +127,7 @@ async def get_main_content(pdf_content):
     ans = ans.replace("\n", "")
 
     parsed_slides = json.loads(ans)
+    print("parsed_slides", parsed_slides)
 
     return parsed_slides
 
@@ -117,7 +141,7 @@ async def create_video(file_path: str, task_id: str, tsm: list):
 
     tsm[0][task_id] = "Generating Script"
     print("\n", "Generating Script")
-    pages = await get_main_content(pdf_content)
+    pages = await get_main_content(pdf_content, 10)
 
     print("\n", "pages", pages)
     

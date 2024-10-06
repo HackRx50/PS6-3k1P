@@ -47,7 +47,7 @@ export const chartColors = {
   },
   lime: {
     bg: "bg-lime-500",
-    stroke: "stroke-lime-500",
+    stroke: "strokeLime-500",
     fill: "fill-lime-500",
     text: "text-lime-500",
   },

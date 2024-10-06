@@ -16,6 +16,11 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
 
+class ImageRequest(BaseModel):
+    script: str
+    ind: int
+    processId: str
+
 class QuizRequest(BaseModel):
     video_name: str
 
@@ -27,6 +32,10 @@ class UserData(BaseModel):
     pause_count: int
     play_time: int
 
+
+class Script(BaseModel):
+    Title: str
+    Script: str
 
 class UserDataDB(Base):
     __tablename__ = "user_data"
