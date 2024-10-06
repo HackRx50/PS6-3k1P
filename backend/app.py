@@ -5,6 +5,7 @@ import os
 import random
 import time
 import uuid
+from fastapi import Query
 
 import boto3
 import httplib2
@@ -96,24 +97,28 @@ async def get_all_data(db: Session = Depends(get_db)):
     data = db.query(UserDataDB).all()
     return data
 
-@app.post('/submit_data')
-async def submit_data(data: UserData, db: Session = Depends(get_db)):
-    new_data = UserDataDB(
-        username=data.username,
-        vid_name=data.vid_name,
-        score=data.score,
-        pause_count=data.pause_count,
-        play_time=data.play_time
-    )
-    db.add(new_data)
-    db.commit()
-    db.refresh(new_data)
-    return {"message": "Data submitted successfully", "data": new_data}
 
-@app.post("/get_quiz")
-async def get_quiz(quiz_request: QuizRequest, db: Session = Depends(get_db)):
+# @app.post('/submit_data')
+# async def submit_data(data: UserData, db: Session = Depends(get_db)):
+#     new_data = UserDataDB(
+#         username=data.username,
+#         vid_name=data.vid_name,
+#         score=data.score,
+#         pause_count=data.pause_count,
+#         play_time=data.play_time
+#     )
+#     db.add(new_data)
+#     db.commit()
+#     db.refresh(new_data)
+#     return {"message": "Data submitted successfully", "data": new_data}
+
+
+
+@app.get("/get_quiz")
+async def get_quiz(video_name: str = Query(...), db: Session = Depends(get_db)):  # Take video_name from query parameters
     try:
-        quiz_data = db.query(QuizDataDB).filter(QuizDataDB.video_name == quiz_request.video_name).all()
+        # Query the database for the quiz corresponding to the video_name
+        quiz_data = db.query(QuizDataDB).filter(QuizDataDB.video_name == video_name).all()
 
         if not quiz_data:
             raise HTTPException(
@@ -142,19 +147,33 @@ async def publish_to_youtube(request: dict):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/test_caps")
-async def test_caps(vid: str):
-    video = "vids/"+vid+".mp4"
-    out = "vids/"+vid+"_caps.mp4"
-    caps = "tmp/subtitles.srt"
-    
-    try:
-        add_subtitle(video, caps, out)
-        await upload_to_s3(vid+"_caps")
-    except Exception as e:
-        print(e)
-        return e
-    return {"status": "done"}
+@app.post('/submit_video_data')
+async def submit_video_data(data: VideoData, db: Session = Depends(get_db)):  # New route for pause_count and play_time
+    new_data = UserDataDB(
+        username=data.username,
+        vid_name=data.vid_name,
+        pause_count=data.pause_count,
+        play_time=data.play_time
+    )
+    db.add(new_data)
+    db.commit()
+    db.refresh(new_data)
+    return {"message": "Video data submitted successfully", "data": new_data}
+
+
+
+
+@app.post('/submit_score_data')
+async def submit_score_data(data: ScoreData, db: Session = Depends(get_db)):  # New route for score
+    new_data = UserDataDB(
+        username=data.username,
+        vid_name=data.vid_name,
+        score=data.score
+    )
+    db.add(new_data)
+    db.commit()
+    db.refresh(new_data)
+    return {"message": "Score data submitted successfully", "data": new_data}
 
 
 if __name__ == '__main__':

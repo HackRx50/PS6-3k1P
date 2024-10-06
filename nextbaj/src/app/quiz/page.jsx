@@ -1,87 +1,81 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from 'react';
+import { useSearchParams } from "next/navigation"; // Import useSearchParams for query params
+import { useEffect, useState } from "react";
+import Navbar from "@/components/Navbar";
 
-function Quiz() {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const { pauseCount, playTime, selectedVideo } = location.state || { pauseCount: 0, playTime: 0, selectedVideo: '' };
+export default function UserQuiz() {
+  const searchParams = useSearchParams(); // Access search parameters
+  const video_name = searchParams.get("video_name"); // Get video_name from search params
+
+  const [quizData, setQuizData] = useState([]); // Initialize quizData as an array
   const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [selectedAnswer, setSelectedAnswer] = useState("");
+  const [answers, setAnswers] = useState([]);
   const [score, setScore] = useState(0);
   const [showScore, setShowScore] = useState(false);
-  const [selectedAnswer, setSelectedAnswer] = useState('');
-  const [quizData, setQuizData] = useState({});
-  const [answers, setAnswers] = useState([]); // Initialize as an empty array
 
   useEffect(() => {
-    const fetchQuizData = async () => {
-      try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/get_quiz`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ video_name: selectedVideo }),
+    console.log("Video Name:", video_name); // Log the video name
+    if (video_name) {
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/get_quiz?video_name=${video_name}`)
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then((data) => {
+          setQuizData(data.quiz); 
+          console.log("Fetched Quiz Data:", data.quiz); // Log the fetched quiz data
+        })
+        .catch((error) => {
+          console.error('There was a problem with the fetch operation:', error);
         });
-        const data = await response.json();
-        // Assuming the response contains the quiz data
-        // Update quizData with the fetched data
-        setQuizData(data);
-        setAnswers(Array(data.quiz.length).fill(null)); // Update answers based on fetched quiz data
-      } catch (error) {
-        console.error('Error fetching quiz data:', error);
-      }
-    };
-
-    if (selectedVideo) {
-      fetchQuizData();
     }
-  }, [selectedVideo]);
-
-  useEffect(() => {
-    const username = localStorage.getItem('username')
-    if (showScore && username) {
-      const data = {
-        username,
-        vid_name: selectedVideo,
-        score,
-        pause_count: pauseCount,
-        play_time: playTime,
-      };
-      fetch(`${process.env.NEXT_PUBLIC_API_URL}/submit_data`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      })
-        .then((response) => response.json())
-        .then((data) => console.log('Success:', data))
-        .catch((error) => console.error('Error:', error));
-    }
-  }, [showScore, pauseCount, playTime, score, selectedVideo]);
+  }, [video_name]);
 
   const handleAnswerClick = (answer) => {
     setSelectedAnswer(answer);
   };
 
-  const handleNextQuestion = () => {
+  const handleNextQuestion = async () => {
     const updatedAnswers = [...answers];
     updatedAnswers[currentQuestion] = selectedAnswer;
     setAnswers(updatedAnswers);
 
-    if (selectedAnswer === quizData.quiz[currentQuestion].correctAnswer) {
+    if (selectedAnswer === quizData[currentQuestion]?.correctAnswer) {
       setScore(score + 1);
     }
 
     setSelectedAnswer("");
     const nextQuestion = currentQuestion + 1;
 
-    if (nextQuestion < quizData.quiz.length) {
+    if (nextQuestion < quizData.length) {
       setCurrentQuestion(nextQuestion);
       setSelectedAnswer(updatedAnswers[nextQuestion]);
     } else {
       setShowScore(true);
+      await submitScoreData(); // Submit score data when quiz is completed
+    }
+  };
+
+  const submitScoreData = async () => {
+    const username = "your_username"; // Replace with actual username logic
+    const data = {
+      username,
+      vid_name: video_name,
+      score,
+    };
+
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/submit_score_data`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+    } catch (error) {
+      console.error("Error submitting score data:", error);
     }
   };
 
@@ -94,62 +88,30 @@ function Quiz() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-50 to-blue-100">
-      <div className="w-full max-w-xl p-8 bg-white shadow-lg rounded-lg">
-        {showScore ? (
-          <div className="text-center">
-            <h2 className="text-3xl font-bold mb-4">Quiz Completed!</h2>
-            <p className="text-xl">You scored {score} out of {quizData.quiz.length}</p>
-            <div className="mt-6">
-              <h3 className="text-2xl font-bold">Video Analytics</h3>
-              <p className="text-lg">Number of pauses: {pauseCount}</p>
-              <p className="text-lg">Total time video played: {playTime} seconds</p>
-            </div>
-            <div className="mt-6">
-              <h3 className="text-2xl font-bold">Quiz Review</h3>
-              <div className="space-y-4">
-                {quizData.quiz.map((question, index) => (
-                  <div key={index} className="p-4 bg-gray-100 rounded-lg shadow-md">
-                    <p className="text-lg font-semibold mb-2">Question {index + 1}: {question.question}</p>
-                    <div className="space-y-2">
-                      {question.options.map((option, optIndex) => (
-                        <div
-                          key={optIndex}
-                          className={`p-2 rounded-md ${
-                            option === question.correctAnswer
-                              ? 'bg-green-200'
-                              : option === answers[index] && option !== question.correctAnswer
-                              ? 'bg-red-200'
-                              : 'bg-white'
-                          }`}
-                        >
-                          {option}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
+    <div className="flex flex-col min-h-screen bg-gradient-to-r from-blue-50 to-blue-100">
+      <Navbar />
+      <div className="flex-grow flex flex-col items-center justify-center p-8">
+        {quizData.length > 0 && (
+          <div className="w-full max-w-xl p-8 bg-white shadow-lg rounded-lg">
+            {showScore ? (
+              <div className="text-center">
+                <h2 className="text-3xl font-bold mb-4 text-black">Quiz Completed!</h2>
+                <p className="text-xl text-black">
+                  You scored {score} out of {quizData.length}
+                </p>
               </div>
-            </div>
-            <button
-              onClick={() => navigate('/')}
-              className="mt-6 py-3 px-4 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            >
-              Return to Home
-            </button>
-          </div>
-        ) : (
-          <>
-            {Object.keys(quizData).length > 0 && ( // Check if quizData is not empty
+            ) : (
               <>
                 <div className="mb-6">
-                  <h2 className="text-2xl font-bold mb-4">
-                    Question {currentQuestion + 1}/{quizData.quiz.length}
+                  <h2 className="text-2xl font-bold mb-4 text-black">
+                    Question {currentQuestion + 1}/{quizData.length}
                   </h2>
-                  <div className="text-lg">{quizData.quiz[currentQuestion].question}</div>
+                  <div className="text-lg text-black">
+                    {quizData[currentQuestion]?.question}
+                  </div>
                 </div>
-                <div className="space-y-4">
-                  {quizData.quiz[currentQuestion].options.map((option, index) => (
+                <div className="space-y-4 text-black">
+                  {quizData[currentQuestion]?.options.map((option, index) => (
                     <button
                       key={index}
                       className={`w-full py-3 px-4 text-left bg-gray-200 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded-md ${
@@ -174,16 +136,14 @@ function Quiz() {
                     disabled={!selectedAnswer}
                     className="py-3 px-4 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-400"
                   >
-                    {currentQuestion + 1 === quizData.quiz.length ? "Finish Quiz" : "Next"}
+                    {currentQuestion + 1 === quizData.length ? "Finish Quiz" : "Next"}
                   </button>
                 </div>
               </>
             )}
-          </>
+          </div>
         )}
       </div>
     </div>
   );
 }
-
-export default Quiz;

@@ -50,11 +50,15 @@ function User() {
   };
 
   const handleTakeQuiz = () => {
-    router.push({
-      pathname: '/quiz',
-      query: { selectedVideo, pauseCount, playTime },
-    });
+    const videoName = selectedVideo; // place this with actual logic
+  
+    // Manually constructing the path string
+    const quizUrl = `/quiz?video_name=${encodeURIComponent(videoName)}`;
+    
+    router.push(quizUrl); // Navigating to the quiz page with video name in the query string
   };
+  
+  
 
   const handleSelectVideo = (video) => {
     setSelectedVideo(video);
@@ -107,23 +111,22 @@ function User() {
     <div className="flex-grow flex flex-col items-center justify-center p-8">
       <h1 className="text-4xl font-extrabold text-blue-800 mb-8">Video Library</h1>
 
-      {selectedVideo ? (
-        <div className="w-full max-w-2xl bg-white shadow-2xl rounded-lg overflow-hidden mb-8">
-          <ReactPlayer
-            ref={playerRef}
-            url={`${process.env.NEXT_PUBLIC_API_URL}/get_video/${selectedVideo}`}
-            playing={playing}
-            controls={true}
-            onEnded={handleVideoEnd}
-            onPause={handlePause}
-            onPlay={handlePlay}
-            onProgress={handleProgress}
-            onSeek={handleSeek}
-            width="100%"
-            height="100%"
-            className="rounded-t-lg"
-          />
-          <div className="flex justify-between mt-4">
+        {selectedVideo ? (
+          <div className="w-full max-w-2xl bg-white shadow-2xl rounded-lg overflow-hidden mb-8">
+            <ReactPlayer
+              ref={playerRef}
+              url={`${process.env.NEXT_PUBLIC_API_URL}/get_video/${selectedVideo}`}
+              playing={playing}
+              controls={true}
+              onEnded={handleVideoEnd}
+              onPause={handlePause}
+              onPlay={handlePlay}
+              onProgress={handleProgress}
+              onSeek={handleSeek}
+              width="100%"
+              height="100%"
+              className="rounded-t-lg"
+            />
             {showQuizButton && (
               <button
                 onClick={handleTakeQuiz}
