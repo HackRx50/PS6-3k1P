@@ -1,11 +1,16 @@
-import httplib2
+import os
+import random
+import time
 from http import client as httplib 
+import httplib2
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaFileUpload
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.file import Storage
 from oauth2client.tools import run_flow
+import boto3
+from fastapi import HTTPException
 
 # YouTube API constants
 CLIENT_SECRETS_FILE = "client_secrets.json"
@@ -22,6 +27,9 @@ RETRIABLE_EXCEPTIONS = (httplib2.HttpLib2Error, IOError, httplib.NotConnected,
   httplib.ResponseNotReady, httplib.BadStatusLine)
 RETRIABLE_STATUS_CODES = [500, 502, 503, 504]
 
+# Initialize S3 client
+s3_client = boto3.client('s3')
+s3_bucket = 'bajttv'  # Replace with your actual S3 bucket name
 
 def get_authenticated_service():
     flow = flow_from_clientsecrets(CLIENT_SECRETS_FILE, scope=YOUTUBE_UPLOAD_SCOPE)
@@ -49,7 +57,11 @@ def initialize_upload(youtube, options):
     # Download the file from S3 if it doesn't exist locally
     local_file_path = f"vids/{options['file']}"
     if not os.path.exists(local_file_path):
-        s3_client.download_file(s3_bucket, options['file'], local_file_path)
+        os.makedirs(os.path.dirname(local_file_path), exist_ok=True)
+        try:
+            s3_client.download_file(s3_bucket, options['file'], local_file_path)
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Failed to download file from S3: {str(e)}")
 
     insert_request = youtube.videos().insert(
         part=",".join(body.keys()),
@@ -72,12 +84,12 @@ def resumable_upload(insert_request):
                     print(f"Video id '{response['id']}' was successfully uploaded.")
                     return response['id']
                 else:
-                    raise Exception("The upload failed with an unexpected response: %s" % response)
+                    raise HTTPException(status_code=500, detail=f"The upload failed with an unexpected response: {response}")
         except HttpError as e:
             if e.resp.status in RETRIABLE_STATUS_CODES:
                 error = f"A retriable HTTP error {e.resp.status} occurred:\n{e.content}"
             else:
-                raise
+                raise HTTPException(status_code=e.resp.status, detail=str(e))
         except RETRIABLE_EXCEPTIONS as e:
             error = f"A retriable error occurred: {e}"
 
@@ -85,7 +97,7 @@ def resumable_upload(insert_request):
             print(error)
             retry += 1
             if retry > MAX_RETRIES:
-                raise Exception("No longer attempting to retry.")
+                raise HTTPException(status_code=500, detail="No longer attempting to retry.")
 
             max_sleep = 2 ** retry
             sleep_seconds = random.random() * max_sleep

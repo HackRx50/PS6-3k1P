@@ -86,7 +86,7 @@ function User() {
           description: "Uploaded from my app",
           keywords: "video,upload",
           category: "22",
-          privacyStatus: "private"
+          privacyStatus: "public"
         }),
       });
 
