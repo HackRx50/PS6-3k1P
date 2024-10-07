@@ -13,6 +13,7 @@ function User() {
   const [playing, setPlaying] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [youtubeLinks, setYoutubeLinks] = useState({});
+  const [selectedPlatform, setSelectedPlatform] = useState(null);
 
   const playerRef = useRef(null);
 
@@ -71,26 +72,46 @@ function User() {
 
   const handleExport = () => {
     setIsModalOpen(true);
+    setSelectedPlatform(null);
+  };
+
+  const handlePlatformSelect = (platform) => {
+    setSelectedPlatform(platform);
   };
 
   const handlePublish = async () => {
-    if (!selectedVideo) return;
+    if (!selectedVideo || !selectedPlatform) return;
     
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL_YT}/publish_to_youtube`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          file: selectedVideo,
-          title: selectedVideo,
-          description: "Uploaded from my app",
-          keywords: "video,upload",
-          category: "22",
-          privacyStatus: "public"
-        }),
-      });
+      let response;
+      switch (selectedPlatform) {
+        case 'youtube':
+          response = await fetch(`${process.env.NEXT_PUBLIC_API_URL_YT}/publish_to_youtube`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              file: selectedVideo,
+              title: selectedVideo,
+              description: "Uploaded from my app",
+              keywords: "video,upload",
+              category: "22",
+              privacyStatus: "public"
+            }),
+          });
+          break;
+        case 'twitter':
+
+          alert('Twitter publishing not implemented yet');
+          return;
+        case 'instagram':
+
+          alert('Instagram publishing not implemented yet');
+          return;
+        default:
+          throw new Error('Invalid platform selected');
+      }
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -99,16 +120,16 @@ function User() {
       }
 
       const result = await response.json();
-      const youtubeLink = `https://www.youtube.com/watch?v=${result.video_id}`;
-      
-      // Update state and local storage with the new YouTube link
-      setYoutubeLinks(prevLinks => {
-        const newLinks = { ...prevLinks, [selectedVideo]: youtubeLink };
-        localStorage.setItem('youtubeLinks', JSON.stringify(newLinks));
-        return newLinks;
-      });
+      if (selectedPlatform === 'youtube') {
+        const youtubeLink = `https://www.youtube.com/watch?v=${result.video_id}`;
+        setYoutubeLinks(prevLinks => {
+          const newLinks = { ...prevLinks, [selectedVideo]: youtubeLink };
+          localStorage.setItem('youtubeLinks', JSON.stringify(newLinks));
+          return newLinks;
+        });
+      }
 
-      alert('Video published successfully!');
+      alert(`Video published successfully to ${selectedPlatform}!`);
       console.log('Publish result:', result);
     } catch (error) {
       console.error('Error publishing video:', error);
@@ -192,8 +213,28 @@ function User() {
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
           <div className="bg-white p-8 rounded-lg">
-            <h2 className="text-2xl font-bold mb-4">Publish to YouTube</h2>
-            <p className="mb-4">Are you sure you want to publish "{selectedVideo}" to YouTube?</p>
+            <h2 className="text-2xl font-bold mb-4">Publish to Platform</h2>
+            <p className="mb-4">Select a platform to publish "{selectedVideo}":</p>
+            <div className="flex justify-center space-x-4 mb-4">
+              <button
+                onClick={() => handlePlatformSelect('youtube')}
+                className={`p-2 rounded-full ${selectedPlatform === 'youtube' ? 'bg-red-500' : 'bg-gray-200'}`}
+              >
+                YouTube
+              </button>
+              <button
+                onClick={() => handlePlatformSelect('twitter')}
+                className={`p-2 rounded-full ${selectedPlatform === 'twitter' ? 'bg-blue-400' : 'bg-gray-200'}`}
+              >
+                Twitter
+              </button>
+              <button
+                onClick={() => handlePlatformSelect('instagram')}
+                className={`p-2 rounded-full ${selectedPlatform === 'instagram' ? 'bg-pink-500' : 'bg-gray-200'}`}
+              >
+                Instagram
+              </button>
+            </div>
             <div className="flex justify-end">
               <button
                 onClick={() => setIsModalOpen(false)}
@@ -203,7 +244,8 @@ function User() {
               </button>
               <button
                 onClick={handlePublish}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                disabled={!selectedPlatform}
+                className={`px-4 py-2 text-white rounded ${selectedPlatform ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-400 cursor-not-allowed'}`}
               >
                 Publish
               </button>
