@@ -9,3 +9,5 @@ vids*
 uploads*
 tmp*
 abc.ipynb
+client_secrets.json
+youtube-oauth2.json

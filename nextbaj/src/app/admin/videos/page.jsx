@@ -12,6 +12,7 @@ function User() {
   const [playTime, setPlayTime] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [youtubeLinks, setYoutubeLinks] = useState({});
 
   const playerRef = useRef(null);
 
@@ -23,6 +24,9 @@ function User() {
       .then((data) => {
         console.log("Fetched data:", data);  // Log the fetched data
         setVideos(data);
+        // Load YouTube links from local storage
+        const storedLinks = JSON.parse(localStorage.getItem('youtubeLinks') || '{}');
+        setYoutubeLinks(storedLinks);
       })
       .catch((error) => console.error("Error fetching videos:", error));
   }, []);
@@ -58,8 +62,6 @@ function User() {
     router.push(quizUrl); // Navigating to the quiz page with video name in the query string
   };
   
-  
-
   const handleSelectVideo = (video) => {
     setSelectedVideo(video);
     setPauseCount(0);
@@ -86,7 +88,7 @@ function User() {
           description: "Uploaded from my app",
           keywords: "video,upload",
           category: "22",
-          privacyStatus: "private"
+          privacyStatus: "public"
         }),
       });
 
@@ -97,6 +99,15 @@ function User() {
       }
 
       const result = await response.json();
+      const youtubeLink = `https://www.youtube.com/watch?v=${result.video_id}`;
+      
+      // Update state and local storage with the new YouTube link
+      setYoutubeLinks(prevLinks => {
+        const newLinks = { ...prevLinks, [selectedVideo]: youtubeLink };
+        localStorage.setItem('youtubeLinks', JSON.stringify(newLinks));
+        return newLinks;
+      });
+
       alert('Video published successfully!');
       console.log('Publish result:', result);
     } catch (error) {
@@ -111,22 +122,23 @@ function User() {
     <div className="flex-grow flex flex-col items-center justify-center p-8">
       <h1 className="text-4xl font-extrabold text-blue-800 mb-8">Video Library</h1>
 
-        {selectedVideo ? (
-          <div className="w-full max-w-2xl bg-white shadow-2xl rounded-lg overflow-hidden mb-8">
-            <ReactPlayer
-              ref={playerRef}
-              url={`${process.env.NEXT_PUBLIC_API_URL}/get_video/${selectedVideo}`}
-              playing={playing}
-              controls={true}
-              onEnded={handleVideoEnd}
-              onPause={handlePause}
-              onPlay={handlePlay}
-              onProgress={handleProgress}
-              onSeek={handleSeek}
-              width="100%"
-              height="100%"
-              className="rounded-t-lg"
-            />
+      {selectedVideo ? (
+        <div className="w-full max-w-2xl bg-white shadow-2xl rounded-lg overflow-hidden mb-8">
+          <ReactPlayer
+            ref={playerRef}
+            url={`${process.env.NEXT_PUBLIC_API_URL}/get_video/${selectedVideo}`}
+            playing={playing}
+            controls={true}
+            onEnded={handleVideoEnd}
+            onPause={handlePause}
+            onPlay={handlePlay}
+            onProgress={handleProgress}
+            onSeek={handleSeek}
+            width="100%"
+            height="100%"
+            className="rounded-t-lg"
+          />
+          <div>
             {showQuizButton && (
               <button
                 onClick={handleTakeQuiz}
@@ -142,6 +154,14 @@ function User() {
               Export
             </button>
           </div>
+          {youtubeLinks[selectedVideo] && (
+            <div className="mt-4 p-4 bg-gray-100 rounded-b-lg">
+              <p className="text-sm text-gray-600">YouTube Link:</p>
+              <a href={youtubeLinks[selectedVideo]} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                {youtubeLinks[selectedVideo]}
+              </a>
+            </div>
+          )}
         </div>
       ) : (
         <p className="text-2xl text-blue-700 mb-8">Select a video to watch</p>
@@ -159,6 +179,11 @@ function User() {
             <div className="p-4">
               <h3 className="font-semibold text-xl text-blue-800 mb-2">{video}</h3>
               <p className="text-sm text-gray-600">Click to watch</p>
+              {youtubeLinks[video] && (
+                <a href={youtubeLinks[video]} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 hover:underline mt-2 block">
+                  YouTube Link
+                </a>
+              )}
             </div>
           </div>
         )) : <p>Loading videos...</p>}

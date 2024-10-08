@@ -198,13 +198,15 @@ async def check_task_status_route(task_id: str):
         raise HTTPException(status_code=404, detail="Task not found")
     return {"status": status}
 
-
+# Add this function to your FastAPI app
 @app.post("/publish_to_youtube")
 async def publish_to_youtube_route(request: dict):
     try:
         youtube = get_authenticated_service()
         video_id = initialize_upload(youtube, request)
         return {"message": "Video uploaded successfully", "video_id": video_id}
+    except HTTPException as e:
+        raise e
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
