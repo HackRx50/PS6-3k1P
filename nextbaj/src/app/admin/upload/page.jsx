@@ -3,12 +3,18 @@
 import { useState } from "react"
 import ImageComp from "./ImageComp"
 
+const LANGUAGES = ["English", "Hindi", "Marathi"]
+
 function Admin() {
   const [selectedFile, setSelectedFile] = useState(null)
   const [uploadStatus, setUploadStatus] = useState("")
   const [selectedCard, setSelectedCard] = useState(0)
   const [numberOfSlides, setNumberOfSlides] = useState(10)
   const [processId, setProcessId] = useState()
+  const [height, setHeight] = useState(960)
+  const [width, setWidth] = useState(540)
+  const [captions, setCaptions] = useState(true) 
+  const [languages, setLanguages] = useState(["English"]) 
 
   const [scripts, setScripts] = useState([])
   const [images, setImages] = useState()
@@ -152,23 +158,131 @@ function Admin() {
                 setScripts(temp)
               }}></textarea>
 
+            <div className="flex flex-row mb-4 gap-3">
+              <div className="inline-flex rounded-md mr-3" role="group">
+                <button
+                  onClick={() => {
+                    setWidth(540)
+                    setHeight(960)
+                  }}
+                  type="button"
+                  className="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-s-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white">
+                  Vertical
+                </button>
+                <button
+                  onClick={() => {
+                    setWidth(950)
+                    setHeight(540)
+                  }}
+                  type="button"
+                  className="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-e-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white">
+                  Horizontal
+                </button>
+              </div>
+
+              <label htmlFor="height" className="my-auto block text-gray-700">
+                Height
+              </label>
+              <input
+                id="height"
+                type="number"
+                value={height}
+                onChange={e => setHeight(e.target.value)}
+                className="mt-1 block w-24 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                min="1" // Minimum value for height
+              />
+
+              <label htmlFor="width" className="my-auto block text-gray-700 ml-3">
+                Width
+              </label>
+              <input
+                id="width"
+                type="number"
+                value={width}
+                onChange={e => setWidth(e.target.value)}
+                className="mt-1 block w-24 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                min="1" // Minimum value for width
+              />
+            </div>
+
             <button
-              onClick={()=>{setImages([])}}
+              onClick={() => {
+                setImages([])
+              }}
               className="w-full px-4 py-2 bg-indigo-600 text-white rounded-md mb-4 hover:bg-indigo-700 transition duration-300">
-              Generate Audio & Images
+              Generate Images
             </button>
           </div>
         )}
 
-        <div className="overflow-x-auto whitespace-nowrap mb-4">
-          {images && (
-            scripts.length != 0 && (
-              scripts.map((card, index) => (
-                <ImageComp key={index} card={card} ind={index} processId={processId}/>
-              ))
-            )
-          )}
-        </div>
+        {images && (
+          <>
+            <div className="overflow-x-auto whitespace-nowrap mb-4">
+              {scripts.length != 0 &&
+                scripts.map((card, index) => (
+                  <ImageComp key={index} card={card} ind={index} processId={processId} height={height} width={width} />
+                ))}
+            </div>
+
+            <div className="flex mb-4">
+              <div className="ml-4 flex items-center rounded-md border-2 py-1 px-2">
+                <input
+                  id="captions"
+                  type="checkbox"
+                  className="mr-2"
+                  checked={captions}
+                  onChange={e => setCaptions(e.target.checked)}
+                />
+                <label htmlFor="captions" className="text-gray-700">
+                  Captions
+                </label>
+              </div>
+
+              <div className="ml-4 flex gap-4 rounded-md border-2 py-1 px-2">
+                {LANGUAGES.map((language, index) => (
+                  <div key={index}>
+                    <input
+                      id={`language-${index}`}
+                      type="checkbox"
+                      className="mr-2"
+                      checked={languages.includes(language)}
+                      onChange={e => {
+                        if (e.target.checked) {
+                          setLanguages([...languages, language])
+                        } else {
+                          setLanguages(languages.filter(l => l !== language))
+                        }
+                      }}
+                    />
+                    <label htmlFor={`language-${index}`} className="text-gray-700">
+                      {language}
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <button
+              onClick={() => {
+                fetch(`${process.env.NEXT_PUBLIC_API_URL}/generate_video`, {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({
+                    processId: processId,
+                    scripts: scripts,
+                    captions: captions,
+                    languages: languages,
+                  }),
+                })
+                console.log("Generate Video")
+              }}
+              className="w-full px-4 py-2 bg-indigo-600 text-white rounded-md mb-4 hover:bg-indigo-700 transition duration-300">
+              Generate Video
+            </button>
+          </>
+        )}
 
         {uploadStatus && <p className="mt-4 text-center text-gray-600">{uploadStatus}</p>}
       </div>

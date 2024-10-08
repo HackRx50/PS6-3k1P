@@ -16,10 +16,18 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
 
+class VideoRequest(BaseModel):
+    preocessId: str
+    scripts: list
+    captions: bool
+    languages: list[str]
+
 class ImageRequest(BaseModel):
     script: str
     ind: int
     processId: str
+    height: int
+    width: int
 
 class QuizRequest(BaseModel):
     video_name: str

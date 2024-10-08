@@ -18,8 +18,8 @@ from pydub.utils import mediainfo
 IMGS_FOLDER = 'temp_imgs'
 AUDS_FOLDER = 'temp_auds'
 
-async def gen_and_save_image(prompt, file_path):
-    image_bytes = await generate_image_from_text(prompt)
+async def gen_and_save_image(prompt, file_path, height, width):
+    image_bytes = await generate_image_from_text(prompt, height, width)
     dataBytesIO = io.BytesIO(image_bytes)
     img = Image.open(dataBytesIO)
     
@@ -59,7 +59,7 @@ async def gen_and_save_quiz(script_compiled, name):
     
     await upload_quiz_data(parsed_quiz_data, name)
 
-async def generate_image_from_text(prompt):
+async def generate_image_from_text(prompt, height, width):
     prompt = prompt + " araminta_illus illustration style"
     
     API_URL = "https://api-inference.huggingface.co/models/black-forest-labs/FLUX.1-dev"
@@ -70,7 +70,7 @@ async def generate_image_from_text(prompt):
     data = {
         "inputs": "Soft Animation Style. "+prompt,
         "parameters": {
-            "height": 400, "width": 800
+            "height": height, "width": width
         }
     }
 
@@ -98,15 +98,22 @@ async def chat_completion(prompt):
     )
     return completion.choices[0].message.content
 
-async def generate_image(script, ind, processId):
+async def generate_image(script, ind, processId, height, width):
     try:
         prompt = "give just a short suitable prompt to give to an image generator as if talking to a 10 year old to create an image for the slide with this content: " + script
         imp = await chat_completion(prompt)
         img_prompt = imp.strip('"')
         
         img_path = f"temp_imgs/{processId}/{ind}"
-        image = await gen_and_save_image(img_prompt, img_path)
-        return f"{img_path}.png"
+        await gen_and_save_image(img_prompt, img_path, height, width)
+        return
+    except Exception as e:
+        print(e)
+        return e
+
+async def generate_video(script, processId, captions, languages):
+    try:
+        pass
     except Exception as e:
         print(e)
         return e
@@ -210,8 +217,6 @@ async def upload_to_s3(name):
         print("Upload successful!")
     except FileNotFoundError:
         print("The file was not found.")
-    except NoCredentialsError:
-        print("Credentials not available.")
 
 async def upload_quiz_data(parsed_quiz_data, name):
     full_name = f"{name}.mp4"

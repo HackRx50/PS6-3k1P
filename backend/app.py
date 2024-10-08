@@ -1,22 +1,19 @@
 import asyncio
-import http.client as httplib
 import json
 import os
 import random
 import time
 import uuid
-from fastapi import Query
 
 import boto3
 from botocore.exceptions import NoCredentialsError
 from database import *
 from dotenv import load_dotenv
-from fastapi import (BackgroundTasks, Depends, FastAPI, Query, File, Form,
-                     HTTPException, UploadFile)
+from fastapi import (BackgroundTasks, Depends, FastAPI, File, Form,
+                     HTTPException, Query, UploadFile)
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
-
 from utils.functions import *
 from utils.youtube import *
 
@@ -41,11 +38,12 @@ task_status_memory = [{}]
 
 
 @app.get('/')
-async def hello():
+async def hello_route():
     return {"message": "Hello from the server!"}
 
+
 @app.post('/upload_pdf')
-async def upload_pdf(background_tasks: BackgroundTasks, pdf: UploadFile = File(...)):
+async def upload_pdf_route(background_tasks: BackgroundTasks, pdf: UploadFile = File(...)):
     if not pdf.filename.endswith('.pdf'):
         raise HTTPException(
             status_code=400, detail="Invalid file type. Only PDFs are allowed.")
@@ -72,7 +70,7 @@ async def upload_pdf(background_tasks: BackgroundTasks, pdf: UploadFile = File(.
 
 
 @app.post('/get_script')
-async def get_script(slides: int = Form(...), pdf: UploadFile = File(...)):
+async def get_script_route(slides: int = Form(...), pdf: UploadFile = File(...)):
     if not pdf.filename.endswith('.pdf'):
         raise HTTPException(
             status_code=400, detail="Invalid file type. Only PDFs are allowed.")
@@ -88,22 +86,37 @@ async def get_script(slides: int = Form(...), pdf: UploadFile = File(...)):
 
 
 @app.post('/generate_image')
-async def get_audios_images(imageRequest: ImageRequest):
+async def generate_image_route(imageRequest: ImageRequest):
     try:
         if not imageRequest:
             raise HTTPException(
                 status_code=400, detail="Invalid request. ImageRequest is required.")
 
-        img_path = await generate_image(imageRequest.script, imageRequest.ind, imageRequest.processId)
+        await generate_image(imageRequest.script, imageRequest.ind, imageRequest.processId, imageRequest.height, imageRequest.width)
 
-        return {"url": img_path}
+        return {"status": "done"}
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail="Error reading images")
 
 
+
+@app.post('/generate_video')
+async def generate_video_route(videoRequest: VideoRequest):
+    try:
+        if not videoRequest:
+            raise HTTPException(
+                status_code=400, detail="Invalid request. VideoRequest is required.")
+
+        await generate_video(videoRequest.scripts, videoRequest.processId, videoRequest.captions, videoRequest.languages)
+        return {"status": "done"}
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=500, detail="Error reading videos")
+
+
 @app.get('/get_videos')
-async def get_videos():
+async def get_videos_route():
     try:
         response = s3_client.list_objects_v2(Bucket=s3_bucket)
         files = [obj['Key'] for obj in response.get('Contents', [])]
@@ -114,15 +127,16 @@ async def get_videos():
 
 
 @app.get('/get_image')
-async def get_image(filename: str = Query(..., description="The name of the image file")):
+async def get_image_route(filename: str = Query(..., description="The name of the image file")):
     try:
         return FileResponse("temp_imgs/" + filename)
     except Exception as e:
         print(e)
         raise HTTPException(status_code=404, detail="File not found")
 
+
 @app.get('/get_video/{filename}')
-async def get_video(filename: str):
+async def get_video_route(filename: str):
     try:
         if not os.path.exists("vids/" + filename):
             s3_client.download_file(s3_bucket, filename, "vids/" + filename)
@@ -134,14 +148,15 @@ async def get_video(filename: str):
         print(e)
         raise HTTPException(status_code=404, detail="File not found")
 
+
 @app.get('/get_all_data')
-async def get_all_data(db: Session = Depends(get_db)):
+async def get_all_data_route(db: Session = Depends(get_db)):
     data = db.query(UserDataDB).all()
     return data
 
 
 # @app.post('/submit_data')
-# async def submit_data(data: UserData, db: Session = Depends(get_db)):
+# async def submit_data_route(data: UserData, db: Session = Depends(get_db)):
 #     new_data = UserDataDB(
 #         username=data.username,
 #         vid_name=data.vid_name,
@@ -155,33 +170,37 @@ async def get_all_data(db: Session = Depends(get_db)):
 #     return {"message": "Data submitted successfully", "data": new_data}
 
 
-
 @app.get("/get_quiz")
-async def get_quiz(video_name: str = Query(...), db: Session = Depends(get_db)):  # Take video_name from query parameters
+# Take video_name from query parameters
+async def get_quiz_route(video_name: str = Query(...), db: Session = Depends(get_db)):
     try:
         # Query the database for the quiz corresponding to the video_name
-        quiz_data = db.query(QuizDataDB).filter(QuizDataDB.video_name == video_name).all()
+        quiz_data = db.query(QuizDataDB).filter(
+            QuizDataDB.video_name == video_name).all()
 
         if not quiz_data:
             raise HTTPException(
                 status_code=404, detail="Quiz not found for the given video name")
 
-        quiz = [{"question": item.question, "options": json.loads(item.options), "correctAnswer": item.correct_answer} for item in quiz_data]
+        quiz = [{"question": item.question, "options": json.loads(
+            item.options), "correctAnswer": item.correct_answer} for item in quiz_data]
 
         return {"quiz": quiz}
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail="Error reading quiz data")
 
+
 @app.get("/check-task-status/{task_id}")
-async def check_task_status(task_id: str):
+async def check_task_status_route(task_id: str):
     status = task_status_memory[0].get(task_id)
     if status is None:
         raise HTTPException(status_code=404, detail="Task not found")
     return {"status": status}
 
+
 @app.post("/publish_to_youtube")
-async def publish_to_youtube(request: dict):
+async def publish_to_youtube_route(request: dict):
     try:
         youtube = get_authenticated_service()
         video_id = initialize_upload(youtube, request)
@@ -189,8 +208,10 @@ async def publish_to_youtube(request: dict):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @app.post('/submit_video_data')
-async def submit_video_data(data: VideoData, db: Session = Depends(get_db)):  # New route for pause_count and play_time
+# New route for pause_count and play_time
+async def submit_video_data_route(data: VideoData, db: Session = Depends(get_db)):
     new_data = UserDataDB(
         username=data.username,
         vid_name=data.vid_name,
@@ -203,10 +224,9 @@ async def submit_video_data(data: VideoData, db: Session = Depends(get_db)):  # 
     return {"message": "Video data submitted successfully", "data": new_data}
 
 
-
-
 @app.post('/submit_score_data')
-async def submit_score_data(data: ScoreData, db: Session = Depends(get_db)):  # New route for score
+# New route for score
+async def submit_score_data_route(data: ScoreData, db: Session = Depends(get_db)):
     new_data = UserDataDB(
         username=data.username,
         vid_name=data.vid_name,
