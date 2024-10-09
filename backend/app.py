@@ -178,6 +178,23 @@ async def submit_score_data(data: ScoreData, db: Session = Depends(get_db)):  # 
     return {"message": "Score data submitted successfully", "data": new_data}
 
 
+@app.post('/create_user')
+async def create_user(user: UserCreate, db: Session = Depends(get_db)):
+    existing_user = db.query(User).filter(User.email == user.email).first()
+    if existing_user:
+        return {"message": "User already exists", "user_id": existing_user.id}
+    
+    new_user = User(
+        name=user.name,
+        email=user.email,
+        isAdmin=user.isAdmin
+    )
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    return {"message": "User created successfully", "user_id": new_user.id}
+
+
 if __name__ == '__main__':
     import uvicorn
     uvicorn.run(app, host="127.0.0.1", port=8000, log_level="info")
