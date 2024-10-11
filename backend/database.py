@@ -2,7 +2,7 @@
 import os
 
 from pydantic import BaseModel
-from sqlalchemy import Column, Integer, String, create_engine
+from sqlalchemy import Column, Integer, String, Boolean, create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
@@ -65,6 +65,7 @@ class UserDataDB(Base):
     pause_count = Column(Integer)
     play_time = Column(Integer)
 
+
 class QuizDataDB(Base):
     __tablename__ = "quiz_data"
     id = Column(Integer, primary_key=True, index=True)
@@ -72,6 +73,31 @@ class QuizDataDB(Base):
     question = Column(String)
     options = Column(String)  # Store options as a JSON string
     correct_answer = Column(String)
+
+class VideoDB(Base):
+    __tablename__ = "videos_data"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, index=True)
+    languages = Column(String)  # Store languages as a JSON string
+    youtube_url = Column(String)
+    thumbnail_url = Column(String)
+    description = Column(String)
+    duration = Column(Integer)
+    no_slides = Column(Integer)
+    scripts = Column(String)  # Store scripts as a JSON string
+    
+
+class UserCreate(BaseModel):
+    name: str
+    email: str
+    isAdmin: bool = False
+
+class User(Base):
+    __tablename__ = "users"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, index=True)
+    email = Column(String, unique=True, index=True)
+    isAdmin = Column(Boolean, default=False)
 
 Base.metadata.create_all(bind=engine)
 
