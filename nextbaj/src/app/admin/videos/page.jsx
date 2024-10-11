@@ -95,7 +95,7 @@ function User() {
       let response;
       switch (selectedPlatform) {
         case 'youtube':
-          response = await fetch(`${process.env.NEXT_PUBLIC_API_URL_YT}/publish_to_youtube`, {
+          response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/publish_to_youtube`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -112,6 +112,7 @@ function User() {
           break;
         case 'twitter':
 
+      
           alert('Twitter publishing not implemented yet');
           return;
         case 'instagram':
@@ -209,14 +210,14 @@ function User() {
             onClick={() => handleSelectVideo(video)}
             style={{ width: '300px', height: '300px' }}
           >
-            <div className="aspect-w-16 aspect-h-9 bg-gray-200 relative" style={{ height: '200px' }}>
+            {/* <div className="aspect-w-16 aspect-h-9 bg-gray-200 relative" style={{ height: '200px' }}>
               <Image
                 src="/avocado-ai-logo.jpeg"
                 alt={`Thumbnail for ${video}`}
                 layout="fill"
                 objectFit="cover"
               />
-            </div>
+            </div> */}
             <div className="p-4 flex-grow flex flex-col">
               <h3 className="font-semibold text-lg text-blue-800 truncate">{video}</h3>
               {youtubeLinks[video] && (
