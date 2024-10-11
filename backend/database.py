@@ -63,6 +63,12 @@ class VideoDB(Base):
     name = Column(String, index=True)
     languages = Column(String)  # Store languages as a JSON string
     youtube_url = Column(String)
+    thumbnail_url = Column(String)
+    description = Column(String)
+    duration = Column(Integer)
+    no_slides = Column(Integer)
+    scripts = Column(String)  # Store scripts as a JSON string
+    
 
 class UserCreate(BaseModel):
     name: str
