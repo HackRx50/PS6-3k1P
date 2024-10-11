@@ -34,7 +34,7 @@ async def gen_and_save_image(prompt, file_path, height, width):
 
 async def translate_text(text, target_language):
 
-    credentials1 = service_account.Credentials.from_service_account_file('../service.json')
+    credentials1 = service_account.Credentials.from_service_account_file('./service.json')
 
     translate_client = translate.Client(credentials=credentials1)
 
@@ -45,8 +45,6 @@ async def translate_text(text, target_language):
     # print(f"Translated Text ({target_language}): {translated_text}")
 
     return translated_text
-
-
 
 async def gen_and_save_audio(script, file_path, language):
 
@@ -65,7 +63,7 @@ async def gen_and_save_audio(script, file_path, language):
 
         script = await translate_text(script, translation_language_code)
 
-    credentials2 = service_account.Credentials.from_service_account_file('../service2.json')
+    credentials2 = service_account.Credentials.from_service_account_file("./service2.json")
     
     # Initialize the Text-to-Speech client with credentials
     client = texttospeech.TextToSpeechClient(credentials=credentials2)
@@ -112,7 +110,7 @@ async def gen_and_save_audio(script, file_path, language):
     #     input=script
     # )
 
-    with open(f'{file_path}_{language}.mp3', 'wb') as f:
+    with open(f'./{file_path}_{language}.mp3', 'wb') as f:
         f.write(response.audio_content)
 
 async def gen_and_save_quiz(script_compiled, name):
