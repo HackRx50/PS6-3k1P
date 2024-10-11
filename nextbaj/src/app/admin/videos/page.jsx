@@ -25,9 +25,8 @@ function User() {
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/get_files`)
       .then((response) => response.json())
       .then((data) => {
-        console.log("Fetched data:", data);  // Log the fetched data
+        console.log("Fetched data:", data);
         setVideos(data);
-        // Load YouTube links from local storage
         const storedLinks = JSON.parse(localStorage.getItem('youtubeLinks') || '{}');
         setYoutubeLinks(storedLinks);
       })
@@ -57,12 +56,11 @@ function User() {
   };
 
   const handleTakeQuiz = () => {
-    const videoName = selectedVideo; // place this with actual logic
+    const videoName = selectedVideo;
   
-    // Manually constructing the path string
     const quizUrl = `/quiz?video_name=${encodeURIComponent(videoName)}`;
     
-    router.push(quizUrl); // Navigating to the quiz page with video name in the query string
+    router.push(quizUrl);
   };
   
   const handleSelectVideo = (video) => {
@@ -70,13 +68,10 @@ function User() {
     setPauseCount(0);
     setPlayTime(0);
     setPlaying(false);
-    // Scroll to the top of the page
     window.scrollTo({
       top: 0,
       behavior: 'smooth'
     });
-    // If you want to scroll to the video player instead, you can use:
-    // videoPlayerRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   const handleExport = () => {
@@ -111,12 +106,9 @@ function User() {
           });
           break;
         case 'twitter':
-
-      
           alert('Twitter publishing not implemented yet');
           return;
         case 'instagram':
-
           alert('Instagram publishing not implemented yet');
           return;
         default:
@@ -210,14 +202,6 @@ function User() {
             onClick={() => handleSelectVideo(video)}
             style={{ width: '300px', height: '300px' }}
           >
-            {/* <div className="aspect-w-16 aspect-h-9 bg-gray-200 relative" style={{ height: '200px' }}>
-              <Image
-                src="/avocado-ai-logo.jpeg"
-                alt={`Thumbnail for ${video}`}
-                layout="fill"
-                objectFit="cover"
-              />
-            </div> */}
             <div className="p-4 flex-grow flex flex-col">
               <h3 className="font-semibold text-lg text-blue-800 truncate">{video}</h3>
               {youtubeLinks[video] && (
