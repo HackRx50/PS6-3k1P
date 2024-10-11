@@ -57,7 +57,6 @@ class QuizDataDB(Base):
     options = Column(String)  # Store options as a JSON string
     correct_answer = Column(String)
 
-
 class VideoDB(Base):
     __tablename__ = "videos_data"
     id = Column(Integer, primary_key=True, index=True)
