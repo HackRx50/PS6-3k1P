@@ -47,52 +47,34 @@ function Home() {
   }, [isSignedIn, isLoaded, user]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-400 to-blue-500 text-white">
-      <main className="container mx-auto px-4 py-16">
-        <div className="text-center mb-16">
-          <h1 className="text-6xl font-extrabold mb-6">
-            Welcome to <span className="text-yellow-300">Avocado AI</span>
-          </h1>
-          <p className="text-2xl mb-8 max-w-3xl mx-auto">
-            Revolutionize Your Content Creation with AI-Powered Video Generation
-          </p>
+    <>
+      <div className="flex-grow flex flex-col items-center justify-center p-10 text-center">
+        <h1 className="text-6xl font-bold text-blue-800 mb-6 animate-fade-in-down">
+          Welcome to HackrX
+        </h1>
+        <div className="text-2xl text-gray-600 mb-8 animate-fade-in-up">
+          Empowering Innovation with Team 3k1p
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
-          <div className="bg-white bg-opacity-20 rounded-lg p-6">
-            <h2 className="text-4xl font-bold mb-6">Transform Your Ideas</h2>
-            <ul className="space-y-4 text-xl">
-              <li>🚀 Convert documents to engaging videos</li>
-              <li>🌍 Generate multilingual content effortlessly</li>
-              <li>📈 Boost your YouTube channel with AI creativity</li>
-              <li>⏱️ Save time and resources in content production</li>
-            </ul>
-          </div>
-          <div className="flex justify-center">
-            <Image
-              src="/avocado-ai-logo.jpeg"
-              alt="Avocado AI Logo"
-              width={400}
-              height={400}
-              className="rounded-full shadow-2xl animate-pulse"
-            />
-          </div>
-        </div>
-
-        <div className="mt-16 text-center">
-          <h2 className="text-3xl font-bold mb-6">Ready to Get Started?</h2>
-          <div className="inline-block bg-white bg-opacity-20 rounded-lg p-4">
-            <span className="mr-2 text-yellow-300 font-semibold">Your Username:</span>
-            <div className="inline-block bg-white bg-opacity-10 px-3 py-2 rounded-md">
+        <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full animate-fade-in">
+          <h2 className="text-3xl font-semibold text-blue-700 mb-4">
+            Your Journey Starts Here
+          </h2>
+          <div className="flex items-center justify-center p-4 bg-blue-50 rounded-lg border-2 border-blue-300 shadow-inner">
+            <span className="mr-2 text-blue-700 font-semibold">Username:</span>
+            <div className="bg-white px-3 py-2 rounded-md shadow-sm">
               <Username />
             </div>
           </div>
+          <p className="mt-6 text-gray-600">
+            Join us in shaping the future of technology and creativity.
+          </p>
         </div>
-      </main>
-      <footer className="bg-white bg-opacity-10 text-white py-4 text-center mt-16">
-        <p>&copy; 2024 Avocado AI. Empowering content creators worldwide.</p>
+      </div>
+      <footer className="bg-blue-800 text-white py-4 text-center">
+        <p>&copy; 2024 HackrX. All rights reserved.</p>
       </footer>
-    </div>
+    </>
+
   );
 }
 

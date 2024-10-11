@@ -195,6 +195,7 @@ async def create_user(user: UserCreate, db: Session = Depends(get_db)):
     return {"message": "User created successfully", "user_id": new_user.id}
 
 
+
 if __name__ == '__main__':
     import uvicorn
     uvicorn.run(app, host="127.0.0.1", port=8000, log_level="info")
