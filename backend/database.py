@@ -2,7 +2,7 @@
 import os
 
 from pydantic import BaseModel
-from sqlalchemy import Column, Integer, String, create_engine
+from sqlalchemy import Column, Integer, String, Boolean, create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
@@ -65,6 +65,17 @@ class VideoDB(Base):
     languages = Column(String)  # Store languages as a JSON string
     youtube_url = Column(String)
 
+class UserCreate(BaseModel):
+    name: str
+    email: str
+    isAdmin: bool = False
+
+class User(Base):
+    __tablename__ = "users"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, index=True)
+    email = Column(String, unique=True, index=True)
+    isAdmin = Column(Boolean, default=False)
 
 Base.metadata.create_all(bind=engine)
 
