@@ -256,8 +256,29 @@ async def create_user(user: UserCreate, db: Session = Depends(get_db)):
     db.refresh(new_user)
     return {"message": "User created successfully", "user_id": new_user.id}
 
+@app.get('/get_video_id/{video_id}')
+async def get_video_id_route(video_id: str, db: Session = Depends(get_db)):
+    try:
+        video_data = db.query(VideoDB).filter(VideoDB.id == video_id).first()
+        if not video_data:
+            raise HTTPException(status_code=404, detail="Video data not found")
+        return {
+            "id": video_data.id,
+            "name": video_data.name,
+            "languages": video_data.languages,
+            "youtube_url": video_data.youtube_url,
+            "thumbnail_url": video_data.thumbnail_url,
+            "description": video_data.description,
+            "duration": video_data.duration,
+            "no_slides": video_data.no_slides,
+            "scripts": video_data.scripts
+        }
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=500, detail="Error fetching video data")
 
 
 if __name__ == '__main__':
     import uvicorn
     uvicorn.run(app, host="127.0.0.1", port=8000, log_level="info")
+
