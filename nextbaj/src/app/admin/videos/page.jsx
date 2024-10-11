@@ -27,10 +27,6 @@ function User() {
       .then((data) => {
         console.log("Fetched data:", data);  // Log the fetched data
         setVideos(data);
-        // Log individual videos
-        data.forEach((video) => {
-          console.log("Individual video:", video);
-        });
         // Load YouTube links from local storage
         const storedLinks = JSON.parse(localStorage.getItem('youtubeLinks') || '{}');
         setYoutubeLinks(storedLinks);
