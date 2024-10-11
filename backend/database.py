@@ -48,6 +48,7 @@ class UserDataDB(Base):
     pause_count = Column(Integer)
     play_time = Column(Integer)
 
+
 class QuizDataDB(Base):
     __tablename__ = "quiz_data"
     id = Column(Integer, primary_key=True, index=True)
@@ -55,6 +56,15 @@ class QuizDataDB(Base):
     question = Column(String)
     options = Column(String)  # Store options as a JSON string
     correct_answer = Column(String)
+
+
+class VideoDB(Base):
+    __tablename__ = "videos_data"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, index=True)
+    languages = Column(String)  # Store languages as a JSON string
+    youtube_url = Column(String)
+
 
 Base.metadata.create_all(bind=engine)
 
