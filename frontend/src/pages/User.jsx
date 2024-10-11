@@ -15,7 +15,7 @@ function User() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_BACKEND_URL}/get_videos`)
+    fetch(`${import.meta.env.VITE_BACKEND_URL}/get_files`)
       .then((response) => response.json())
       .then((data) => setVideos(data))
       .catch((error) => console.error("Error fetching videos:", error));
@@ -69,7 +69,7 @@ function User() {
           <div className="w-full max-w-2xl bg-white shadow-2xl rounded-lg overflow-hidden mb-8">
             <ReactPlayer
               ref={playerRef}
-              url={`${import.meta.env.VITE_BACKEND_URL}/get_video/${selectedVideo}`}
+              url={`${import.meta.env.VITE_BACKEND_URL}/get_file/${selectedVideo}`}
               playing={playing}
               controls={true}
               onEnded={handleVideoEnd}

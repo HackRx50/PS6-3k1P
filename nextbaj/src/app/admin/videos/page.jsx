@@ -22,7 +22,7 @@ function User() {
   const router = useRouter();
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/get_videos`)
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/get_files`)
       .then((response) => response.json())
       .then((data) => {
         console.log("Fetched data:", data);  // Log the fetched data
@@ -158,7 +158,7 @@ function User() {
           <div className="aspect-w-16 aspect-h-9">
             <ReactPlayer
               ref={playerRef}
-              url={`${process.env.NEXT_PUBLIC_API_URL}/get_video/${selectedVideo}`}
+              url={`${process.env.NEXT_PUBLIC_API_URL}/get_file/${selectedVideo}`}
               playing={playing}
               controls={true}
               onEnded={handleVideoEnd}

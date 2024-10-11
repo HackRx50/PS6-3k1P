@@ -8,6 +8,7 @@ import time
 
 import boto3
 import requests
+from botocore.client import Config
 from database import *
 from moviepy.editor import AudioFileClip, ImageClip, concatenate_videoclips
 from openai import OpenAI
@@ -208,7 +209,8 @@ async def create_video(file_path: str, task_id: str, tsm: list):
     return
 
 async def upload_to_s3(name):
-    s3 = boto3.client('s3')
+    # s3 = boto3.client('s3')
+    s3 = boto3.client('s3', region_name="ap-south-1", config=Config(signature_version='s3v4'))
     bucket_name = 'bajttv'
     file_path = f'vids/{name}.mp4'
     print(file_path)
