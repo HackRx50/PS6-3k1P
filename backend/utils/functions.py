@@ -14,6 +14,9 @@ from openai import OpenAI
 from pdfminer.high_level import extract_text
 from PIL import Image
 from pydub.utils import mediainfo
+from google.cloud import translate_v2 as translate
+from google.cloud import texttospeech
+from google.oauth2 import service_account
 
 IMGS_FOLDER = 'temp_imgs'
 AUDS_FOLDER = 'temp_auds'
@@ -29,18 +32,88 @@ async def gen_and_save_image(prompt, file_path, height, width):
         os.makedirs(folder)
     img.save(f"{file_path}.png")
 
-async def gen_and_save_audio(script, file_path):
-    client = OpenAI()
+async def translate_text(text, target_language):
 
-    # Run the synchronous call in a separate thread
-    response = await asyncio.to_thread(client.audio.speech.create,
-        model="tts-1",
-        voice="shimmer",
-        input=script
+    credentials1 = service_account.Credentials.from_service_account_file('../service.json')
+
+    translate_client = translate.Client(credentials=credentials1)
+
+    # Translate the text into the target language
+    result = translate_client.translate(text, target_language=target_language)
+    translated_text = result["translatedText"]
+    # print(f"Original Text: {text}")
+    # print(f"Translated Text ({target_language}): {translated_text}")
+
+    return translated_text
+
+
+
+async def gen_and_save_audio(script, file_path, language):
+
+    if(language!="english"):
+        translation_language_codes = {
+            "hindi": "hi",
+            "marathi": "mr",
+            "tamil": "ta",
+            "telugu": "te",
+            "malayalam": "ml",
+            "kannada": "kn",
+            "bengali": "bn"
+        }
+
+        translation_language_code = translation_language_codes.get(language.lower(), "hi")
+
+        script = await translate_text(script, translation_language_code)
+
+    credentials2 = service_account.Credentials.from_service_account_file('../service2.json')
+    
+    # Initialize the Text-to-Speech client with credentials
+    client = texttospeech.TextToSpeechClient(credentials=credentials2)
+
+    # Set the text input to be synthesized
+    synthesis_input = texttospeech.SynthesisInput(text=script)
+
+    language_codes = {
+    "english": "en-US",
+    "hindi": "hi-IN",
+    "marathi": "mr-IN",
+    "tamil": "ta-IN",
+    "telugu": "te-IN",
+    "malayalam": "ml-IN",
+    "kannada": "kn-IN",
+    "bengali": "bn-IN"
+    }
+
+    # Get the language code from the dictionary
+    tts_language_code = language_codes.get(language.lower(), "en-IN")
+
+
+    # Build the voice request, select the language code and voice
+    voice = texttospeech.VoiceSelectionParams(
+        language_code=tts_language_code,
+        ssml_gender=texttospeech.SsmlVoiceGender.NEUTRAL
     )
 
-    with open(f'{file_path}.mp3', 'wb') as f:
-        f.write(response.content)
+    # Select the audio configuration
+    audio_config = texttospeech.AudioConfig(
+        audio_encoding=texttospeech.AudioEncoding.MP3
+    )
+
+    # Perform the text-to-speech request
+    response = client.synthesize_speech(
+        input=synthesis_input, voice=voice, audio_config=audio_config
+    )
+
+    # client = OpenAI()
+    # # Run the synchronous call in a separate thread
+    # response = await asyncio.to_thread(client.audio.speech.create,
+    #     model="tts-1",
+    #     voice="shimmer",
+    #     input=script
+    # )
+
+    with open(f'{file_path}_{language}.mp3', 'wb') as f:
+        f.write(response.audio_content)
 
 async def gen_and_save_quiz(script_compiled, name):
     ## Create quiz 
@@ -179,7 +252,7 @@ async def create_video(file_path: str, task_id: str, tsm: list):
     for i, page in enumerate(pages):
         try:
             PostScriptTasks.append(gen_and_save_image(page["image"], f"{IMGS_FOLDER}/{i}")) # image
-            PostScriptTasks.append(gen_and_save_audio(page['Script'], f'{AUDS_FOLDER}/{i}'))# audio
+            PostScriptTasks.append(gen_and_save_audio(page['Script'], f'{AUDS_FOLDER}/{i}',"english"))# audio
         except Exception as e:
             print(e)
             return e
