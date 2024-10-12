@@ -302,7 +302,8 @@ async def gen_script_and_choose_vid(pdf_content, n):
         "Daily Needs": "Everyday essentials including groceries, personal care items, and household supplies."
     }
 
-    chosen = classify_vid_genre(pdf_content=pdf_content)
+    chosen = await classify_vid_genre(pdf_content=pdf_content)
+    print(chosen)
 
     chosen_description = description_dict.get(chosen)
 
