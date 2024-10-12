@@ -219,8 +219,25 @@ async def get_script_from_pdf(file_path, n):
     pages = await get_main_content(pdf_content, n)
     return pages
 
+async def classify_vid_genre(pdf_content):
+    prompt="Content: "+pdf_content+"\nClassify the above into one of three option based on what it is about.the options are Car, Health and Daily Needs.The output should be ONLY one of the options, nothing else"
+    ans = await chat_completion(prompt)
+
+    return ans
+
 async def gen_script_and_choose_vid(pdf_content):
-    prompt = '''Think of yourself as an expert script writter for compeling social media video\n\nContent:'''+ pdf_content + "\n\n" + '''From the content,make script for a concise and interesting video while keeping in mind that multiple corresponding videos will support each subscript.The description of the videos are as following. vid1 description: a man carefully takes care of his posh car by cleaning the window sill with his hands. vid2 description: BMW car driving down the road. vid3 description: a car accident with a truck in the highway. vid4 description: a happy family enjoying in their car. The script must have a storyline and be written keeping in mind the description of video. Do not use vid description to write the script, just use it to choose. The narrative should mention the product as the one that solves the problem. The entire script generated should be in the form of 4 subscripts. Use simpler language, make it sound more natural like someone is narrating a story. The time taken to speak each subscript should be less than 10 seconds.  The subscripts must collectively include all the important information in content for any customer. The answer should contain the subscript to be spoken and corresponding vid. Format the answer only as a list of json objects with just 2 key called Subscript and Video. Only give the json. No emojis'''
+
+    description_dict = {
+        "Car": "vid1 description: a man carefully takes care of his posh car by cleaning the window sill with his hands. vid2 description: BMW car driving down the road. vid3 description: a car accident with a truck in the highway. vid4 description: a happy family enjoying in their car.",
+        "Health": "Resources and products focused on physical and mental well-being, medical care, and fitness.",
+        "Daily Needs": "Everyday essentials including groceries, personal care items, and household supplies."
+    }
+
+    chosen = classify_vid_genre(pdf_content=pdf_content)
+
+    chosen_description = description_dict.get(chosen)
+
+    prompt = '''Think of yourself as an expert script writter for compeling social media video\n\nContent:'''+ pdf_content + "\n\n" + f'''From the content,make script for a concise and interesting video while keeping in mind that multiple corresponding videos will support each subscript.The description of the videos are as following. {chosen_description} The script must have a storyline and be written keeping in mind the description of video. Do not use vid description to write the script, just use it to choose. The narrative should mention the product as the one that solves the problem. The entire script generated should be in the form of 4 subscripts. Use simpler language, make it sound more natural like someone is narrating a story. The time taken to speak each subscript should be less than 10 seconds.  The subscripts must collectively include all the important information in content for any customer. The answer should contain the subscript to be spoken and corresponding vid. Format the answer only as a list of json objects with just 2 key called Subscript and Video. Only give the json. No emojis'''
 
     ans = await chat_completion(prompt)
     ans = ans.strip("```")
