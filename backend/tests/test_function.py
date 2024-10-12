@@ -1,7 +1,7 @@
 import os
 from moviepy.editor import VideoFileClip, concatenate_videoclips
 
-def combine_videos(video_folder, output_filename="combined_video.mp4", transition_duration=0.5):
+def stock_videos(video_folder, output_filename="combined_video.mp4", transition_duration=0.5):
     # Get the paths of the video files
     video_files = [
         os.path.join(video_folder, "vid1.mp4"),
@@ -36,4 +36,4 @@ def combine_videos(video_folder, output_filename="combined_video.mp4", transitio
     print(f"Combined video saved as {output_filename}")
 
 # Example usage
-combine_videos(r"C:\Projects\hackrx\backend\stockvids\car")
+stock_videos(r"C:\Projects\hackrx\backend\stockvids\car")
