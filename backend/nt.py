@@ -1,5 +1,4 @@
-from moviepy.editor import (AudioFileClip, CompositeAudioClip, VideoFileClip,
-                            concatenate_audioclips, concatenate_videoclips)
+
 import asyncio
 
 from pdfminer.high_level import extract_text
@@ -10,6 +9,7 @@ async def main():
     processId = 'asdf'
     languages = ['english', 'hindi', 'marathi']
     captions = True
+
     # text = extract_text("uploads/private-car-package-policy.pdf")
     # scripts = await gen_script_and_choose_vid(text, 120)
     # print(scripts)
@@ -18,7 +18,6 @@ async def main():
     for script in scripts:
       script['Script'] = script.pop('Subscript')
     # print(scripts)
-    
     
     await gengen(scripts, processId, captions, languages)
 
