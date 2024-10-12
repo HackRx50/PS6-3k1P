@@ -5,12 +5,15 @@ from google.cloud import translate_v2 as translate
 from google.cloud import texttospeech
 from google.oauth2 import service_account
 
+from pydub import AudioSegment
 
 import subprocess
 from pydub.utils import mediainfo
 import json
 import asyncio
 from openai import OpenAI
+
+from database import *
 
 
 
@@ -96,7 +99,7 @@ async def gen_script_and_choose_vid(pdf_content, n):
     print(desc_dict)
 
     prompt = '''Think of yourself as an expert script writter for compeling social media video\n\nContent:''' + pdf_content + "\n\n" + \
-        f'''From the content,make script for a concise and interesting video while keeping in mind that multiple corresponding videos will support each subscript.The description of the videos are as following. {desc_dict} The script must have a storyline and be written keeping in mind the description of video. Do not use vid description to write the script, just use it to choose. The narrative should mention the product as the one that solves the problem. The entire script generated should be such that the time taken to speak collection of all subscripts is less than {n} seconds. Accordingly choose number of scripts. Use simpler language, make it sound more natural like someone is narrating a story. The time taken to speak each subscript should be less than 10 seconds.  The subscripts must collectively include all the important information in content for any customer. The answer should contain the subscript to be spoken and corresponding vid. Format the answer only as a list of json objects with just 2 key called Subscript and Video. Only give the json. No emojis. '''
+        f'''From the content, make script for a concise and interesting video while keeping in mind that multiple corresponding videos will support each subscript.The description of the videos are as following. {desc_dict}. The script must have a storyline and be written keeping in mind the description of video. Do not use vid description to write the script, just use it to choose. The narrative should mention the product as the one that solves the problem. The entire script generated should be such that the time taken to speak collection of all subscripts is less than {n} seconds. Accordingly choose number of scripts. Format the answer only as a list of json objects with just 2 key called Subscript and Video. Only give the json. No emojis. '''
 
     ans = await chat_completion(prompt)
     print('asdf', ans)
@@ -230,29 +233,40 @@ async def gengen(scripts, processId, chosen, languages):
         for sc in scripts:
             vids.append(f"stockvids/{chosen}/{sc['Video']}.mp4")
             scs.append(sc['Script'])
-            
+
         gen_and_save_srt(scs, processId)
-        
+
         for lang in languages:
             audios = [f'temp_auds/{processId}_{i}_{lang}.mp3' for i in range(len(scripts))]
-        
+
             await combcomb(vids, audios, f'vids/{processId}_{lang}_ttt')
             add_subtitle(f"vids/{processId}_{lang}_ttt.mp4", f"subtitles/{processId}.srt", f"vids/{processId}_{lang}.mp4")
-
-        
 
     except Exception as e:
         print(e)
         return e
 
+def audio_length(file_path):
+    audio = AudioSegment.from_file(file_path)
+    duration_in_milliseconds = len(audio)
+    duration_in_seconds = duration_in_milliseconds / 1000
+    return duration_in_seconds
+
 async def combcomb(vids, auds, name):
     bajaj = "stockvids/bajaj/bajaj_logo.mp4"
     bg_aud = "temp_auds/bg_upbeat.mp3"
+    
+    audio_clips = [AudioFileClip(aud) for aud in auds]
+    
+    aud_lens = []
+    for aud in auds:
+        aud_lens.append(audio_length(aud))
+    total_len = sum(aud_lens)
 
     clips = []
-    for vid in vids:
+    for i,vid in enumerate(vids):
         clips.append(VideoFileClip(
-            vid, target_resolution=(720, 1280), audio=False))
+            vid, target_resolution=(720, 1280), audio=False).subclip(0, aud_lens[i]))
 
     clip3 = VideoFileClip(bajaj, target_resolution=(720, 1280), audio=False)
     clips.append(clip3)
@@ -261,13 +275,12 @@ async def combcomb(vids, auds, name):
     final_clip = concatenate_videoclips(clips)
 
     # Load the audio clips
-    audio_clips = [AudioFileClip(aud) for aud in auds]
 
     # Concatenate the audio clips
     audio = concatenate_audioclips(audio_clips)
 
     # Load the background audio
-    bg_audio = AudioFileClip(bg_aud)
+    bg_audio = AudioFileClip(bg_aud).subclip(0, total_len)
 
     audio = audio.volumex(0.8)  # Adjust volume of the main audio
     bg_audio = bg_audio.volumex(0.2)  # Adjust volume of the background audio

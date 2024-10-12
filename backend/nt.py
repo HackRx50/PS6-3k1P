@@ -10,6 +10,9 @@ async def main():
     languages = ['english', 'hindi', 'marathi']
     captions = True
 
+    vids = ['stockvids/car/vid1.mp4', 'stockvids/car/vid2.mp4', 'stockvids/car/vid3.mp4', 'stockvids/car/vid4.mp4']
+    auds = ['temp_auds/asdf_1_english.mp3', 'temp_auds/asdf_2_english.mp3', 'temp_auds/asdf_3_english.mp3', 'temp_auds/asdf_4_english.mp3']
+
     # text = extract_text("uploads/private-car-package-policy.pdf")
     # scripts = await gen_script_and_choose_vid(text, 120)
     # print(scripts)
@@ -19,9 +22,9 @@ async def main():
       script['Script'] = script.pop('Subscript')
     # print(scripts)
     
-    await gengen(scripts, processId, captions, languages)
+    # await gengen(scripts, processId, captions, languages)
 
-    # await comb(vids, auds, f'{processId}')
+    await combcomb(vids, auds, f'{processId}')
     # add_subtitle(f"{processId}.mp4", "subtitles/4321.srt", f"{processId}_sub.mp4")
 
 # Run the main function

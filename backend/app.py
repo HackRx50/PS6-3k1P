@@ -84,7 +84,7 @@ async def get_script_route(slides: int = Form(...), pdf: UploadFile = File(...))
     # scripts = await get_script_from_pdf(file_path, slides)
     scripts, chosen = await gen_script_and_choose_vid(file_path, slides)
 
-    return {"scripts": scripts, "processId": str(uuid.uuid4()), "chosen":chosen}
+    return {"scripts": scripts, "processId": random.randint(100000, 999999), "chosen":chosen}
 
 
 @app.post('/generate_image')
@@ -103,14 +103,23 @@ async def generate_image_route(imageRequest: ImageRequest):
 
 
 @app.post('/generate_video')
-async def generate_video_route(videoRequest: VideoRequest):
+async def generate_video_route(videoRequest: VideoRequest, db: Session = Depends(get_db)):
     try:
         if not videoRequest:
             raise HTTPException(
                 status_code=400, detail="Invalid request. VideoRequest is required.")
 
         await gengen(videoRequest.scripts, videoRequest.processId, videoRequest.chosen, videoRequest.languages)
-        
+        for lang in videoRequest.languages:
+            await upload_to_s3(f"{videoRequest.processId}_{lang}.mp4")
+
+            # add new record to VideoDB
+            video = VideoDB(name=VideoRequest.processId,
+                            languages=VideoRequest.languages,
+                            scripts=json.dumps(VideoRequest.scripts))
+            db.add(video)
+            db.commit()
+
         return {"status": "done"}
     except Exception as e:
         print(e)
