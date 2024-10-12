@@ -258,6 +258,7 @@ async def create_user(user: UserCreate, db: Session = Depends(get_db)):
     db.refresh(new_user)
     return {"message": "User created successfully", "user_id": new_user.id}
 
+
 @app.get('/get_video_id/{video_id}')
 async def get_video_id_route(video_id: str, db: Session = Depends(get_db)):
     try:

@@ -212,7 +212,7 @@ async def upload_to_s3(name):
     # s3 = boto3.client('s3')
     s3 = boto3.client('s3', region_name="ap-south-1", config=Config(signature_version='s3v4'))
     bucket_name = 'bajttv'
-    file_path = f'vids/{name}.mp4'
+    file_path = f'vids/{name}'
     print(file_path)
     try:
         s3.upload_file(file_path, bucket_name, f'{name}.mp4')

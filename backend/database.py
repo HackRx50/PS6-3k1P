@@ -15,7 +15,6 @@ engine = create_engine(os.environ.get("NEON_DATABASE_URL"))
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
-
 class VideoRequest(BaseModel):
     preocessId: str
     scripts: list
