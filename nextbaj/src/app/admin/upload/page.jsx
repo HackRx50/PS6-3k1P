@@ -3,7 +3,7 @@
 import { useState } from "react"
 import ImageComp from "./ImageComp"
 
-const LANGUAGES = ["English", "Hindi", "Marathi"]
+const LANGUAGES = ["english", "hindi", "marathi", "tamil", "telugu", "kannada", "malayalam", "bengali", "gujarati", "punjabi"]
 
 function Admin() {
   const [selectedFile, setSelectedFile] = useState(null)
@@ -13,8 +13,8 @@ function Admin() {
   const [processId, setProcessId] = useState()
   const [height, setHeight] = useState(960)
   const [width, setWidth] = useState(540)
-  const [captions, setCaptions] = useState(true) 
-  const [languages, setLanguages] = useState(["English"]) 
+  const [captions, setCaptions] = useState(true)
+  const [languages, setLanguages] = useState(["English"])
 
   const [scripts, setScripts] = useState([])
   const [images, setImages] = useState()
@@ -82,19 +82,29 @@ function Admin() {
 
         <div>
           <div className="mb-4">
-            <div className="mb-4">
-              {/* New Numeric Input for Number of Slides */}
-              <label htmlFor="number-of-slides" className="block text-gray-700">
-                Number of Slides:
-              </label>
-              <input
-                id="number-of-slides"
-                type="number"
-                value={numberOfSlides}
-                onChange={e => setNumberOfSlides(e.target.value)}
-                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                min="1" // Minimum value for slides
-              />
+            <div className="mb-4 grid grid-cols-2 gap-4">
+              <div className="flex flex-row">
+                {/* New Numeric Input for Number of Slides */}
+                <label htmlFor="number-of-slides" className="my-auto mr-2 block text-lg text-gray-700 font-semibold">
+                  Number of Slides:
+                </label>
+                <input
+                  id="number-of-slides"
+                  type="number"
+                  value={numberOfSlides}
+                  onChange={e => setNumberOfSlides(e.target.value)}
+                  className="mt-1 block border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  min="1" // Minimum value for slides
+                />
+              </div>
+              <div className="flex flex-row">
+                <label htmlFor="number-of-slides" className="my-auto block text-lg text-gray-700 font-semibold">
+                  Approximate Time:
+                </label>
+                <label htmlFor="number-of-slides" className="ml-2 my-auto block text-lg text-gray-700">
+                  {numberOfSlides * 15} secs
+                </label>
+              </div>
             </div>
             <div className="flex items-center justify-center w-full">
               <label
@@ -238,13 +248,13 @@ function Admin() {
                 </label>
               </div>
 
-              <div className="ml-4 flex gap-4 rounded-md border-2 py-1 px-2">
+              <div className="ml-4 grid grid-cols-9 gap-4 rounded-md border-2 py-1 px-2">
                 {LANGUAGES.map((language, index) => (
-                  <div key={index}>
+                  <div className="flex flex-row" key={index}>
                     <input
                       id={`language-${index}`}
                       type="checkbox"
-                      className="mr-2"
+                      className="mr-2 my-auto"
                       checked={languages.includes(language)}
                       onChange={e => {
                         if (e.target.checked) {
@@ -254,8 +264,8 @@ function Admin() {
                         }
                       }}
                     />
-                    <label htmlFor={`language-${index}`} className="text-gray-700">
-                      {language}
+                    <label htmlFor={`language-${index}`} className="my-auto text-gray-700">
+                      {language.charAt(0).toUpperCase() + language.slice(1)}
                     </label>
                   </div>
                 ))}

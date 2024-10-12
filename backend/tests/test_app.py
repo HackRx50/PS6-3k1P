@@ -1,6 +1,3 @@
-import os
-
-import pytest
 from fastapi.testclient import TestClient
 
 from backend.app import app
@@ -59,8 +56,8 @@ def test_generate_video_route():
     assert response.status_code == 200
     assert response.json() == {"status": "done"}
 
-def test_get_videos_route():
-    response = client.get('/get_videos')
+def test_get_files_route():
+    response = client.get('/get_files')
     assert response.status_code == 200
     assert isinstance(response.json(), list)
 
@@ -68,8 +65,8 @@ def test_get_image_route():
     response = client.get('/get_image', params={"filename": "test_image.png"})
     assert response.status_code in [200, 404]
 
-def test_get_video_route():
-    response = client.get('/get_video/test_video.mp4')
+def test_get_file_route():
+    response = client.get('/get_file/test_video.mp4')
     assert response.status_code in [200, 404]
 
 def test_get_all_data_route():

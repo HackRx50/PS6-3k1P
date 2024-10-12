@@ -1,11 +1,10 @@
 import asyncio
 import json
 import os
-import random
-import time
 import uuid
 
 import boto3
+from botocore.client import Config
 from botocore.exceptions import NoCredentialsError
 from database import *
 from dotenv import load_dotenv
@@ -31,7 +30,7 @@ app.add_middleware(
 )
 
 s3_bucket = 'bajttv'
-s3_client = boto3.client('s3')
+s3_client = boto3.client('s3', region_name="ap-south-1", config=Config(signature_version='s3v4'))
 
 # task status memory list because mutable, and can be passed as reference
 task_status_memory = [{}]
@@ -100,7 +99,6 @@ async def generate_image_route(imageRequest: ImageRequest):
         raise HTTPException(status_code=500, detail="Error reading images")
 
 
-
 @app.post('/generate_video')
 async def generate_video_route(videoRequest: VideoRequest):
     try:
@@ -115,8 +113,8 @@ async def generate_video_route(videoRequest: VideoRequest):
         raise HTTPException(status_code=500, detail="Error reading videos")
 
 
-@app.get('/get_videos')
-async def get_videos_route():
+@app.get('/get_files')
+async def get_files_route():
     try:
         response = s3_client.list_objects_v2(Bucket=s3_bucket)
         files = [obj['Key'] for obj in response.get('Contents', [])]
@@ -135,15 +133,15 @@ async def get_image_route(filename: str = Query(..., description="The name of th
         raise HTTPException(status_code=404, detail="File not found")
 
 
-@app.get('/get_video/{filename}')
-async def get_video_route(filename: str):
+@app.get('/get_file/{filename}')
+async def get_file_route(filename: str):
+    expiration = 3600
     try:
-        if not os.path.exists("vids/" + filename):
-            s3_client.download_file(s3_bucket, filename, "vids/" + filename)
-        return FileResponse("vids/" + filename)
-    except NoCredentialsError:
-        raise HTTPException(
-            status_code=403, detail="Credentials not available")
+        url = s3_client.generate_presigned_url('get_object',
+                                               Params={
+                                                   'Bucket': s3_bucket, 'Key': filename},
+                                               ExpiresIn=expiration)
+        return {"url": url}
     except Exception as e:
         print(e)
         raise HTTPException(status_code=404, detail="File not found")
@@ -199,6 +197,8 @@ async def check_task_status_route(task_id: str):
     return {"status": status}
 
 # Add this function to your FastAPI app
+
+
 @app.post("/publish_to_youtube")
 async def publish_to_youtube_route(request: dict):
     try:
@@ -245,7 +245,7 @@ async def create_user(user: UserCreate, db: Session = Depends(get_db)):
     existing_user = db.query(User).filter(User.email == user.email).first()
     if existing_user:
         return {"message": "User already exists", "user_id": existing_user.id}
-    
+
     new_user = User(
         name=user.name,
         email=user.email,
@@ -255,6 +255,7 @@ async def create_user(user: UserCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_user)
     return {"message": "User created successfully", "user_id": new_user.id}
+
 
 @app.get('/get_video_id/{video_id}')
 async def get_video_id_route(video_id: int, db: Session = Depends(get_db)):
@@ -276,7 +277,6 @@ async def get_video_id_route(video_id: int, db: Session = Depends(get_db)):
     except Exception as e:
         print(f"Error fetching video data: {str(e)}")
         raise HTTPException(status_code=500, detail="Error fetching video data")
-
 
 if __name__ == '__main__':
     import uvicorn
