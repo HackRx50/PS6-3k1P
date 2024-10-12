@@ -1,6 +1,15 @@
 from utils.functions import *
 import asyncio
 
+def test_write_hindi():
+  # Hindi text
+  hindi_text = "नमस्ते, कैसे हैं आप?"
+
+  # Open a file for writing and specify UTF-8 encoding
+  with open("hindi_output.srt", "w", encoding="utf-8") as file:
+      file.write(hindi_text)
+
+  print("Text written to hindi_output.txt")
 
 def test_gen_and_save_srt():
   scripts = [
@@ -47,4 +56,4 @@ async def test_translate_text():
 
 
 if __name__=="__main__":
-  test_gen_and_save_srt()
+  test_write_hindi()

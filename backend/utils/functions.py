@@ -189,15 +189,30 @@ async def generate_image(script, ind, processId, height, width):
 
 async def generate_video(scripts, processId, captions, languages):
     try:
-        # generate audios from script and in a list of languages
+        translation_language_codes = {
+            "hindi": "hi",
+            "marathi": "mr",
+            "tamil": "ta",
+            "telugu": "te",
+            "malayalam": "ml",
+            "kannada": "kn",
+            "bengali": "bn",
+            "punjabi": "pa",
+        }
         
         # for i, language in enumerate(languages):
         #     for j, script in enumerate(scripts):
         #         await gen_and_save_audio(script['Script'], f'temp_auds/{processId}_{j}', language)
         
-        gen_and_save_srt(scripts, processId)
-        
-        lang = 'hindi'
+        lang = 'marathi'
+
+        translation_language_code = translation_language_codes.get(lang.lower(), "hi")
+
+        lang_scripts = []
+        for script in scripts:
+            translated_script = await translate_text(script['Script'], translation_language_code)
+            lang_scripts.append(translated_script)
+        gen_and_save_srt(lang_scripts, f'{processId}_{lang}')
         
         # audios = [f'temp_auds/{processId}_{i}_{lang}.mp3' for i in range(len(scripts))]
         # images = sorted([f"temp_imgs/{processId}/{f}" for f in os.listdir(f"temp_imgs/{processId}") if f.endswith('.png')])
@@ -208,7 +223,7 @@ async def generate_video(scripts, processId, captions, languages):
         
         # # combine audio and video.
         # await combine_audio_and_video(f'{processId}_{lang}', audios, images)
-        add_subtitle(f'vids/{processId}_{lang}.mp4', f'subtitles/{processId}.srt', f'vids/{processId}_{lang}_final.mp4')
+        # add_subtitle(f'vids/{processId}_{lang}.mp4', f'subtitles/{processId}.srt', f'vids/{processId}_{lang}_final.mp4')
         
     except Exception as e:
         print(e)
@@ -416,19 +431,21 @@ def gen_and_save_srt(scripts, name):
     srt_entry_number = 1  
     srt_file_path = f'subtitles/{name}.srt'  
 
-    with open(srt_file_path, 'w') as srt_file:
-        for ind in range(len(scripts)):
+    
+    with open(srt_file_path, 'w', encoding="utf-8") as srt_file:
+        for ind, script in enumerate(scripts):
             
             N = 3
-            split = scripts[ind]['Script'].split(' ')
+            split = script.split(' ')
             split = [word for word in split if word.strip()]
 
             sentences = [' '.join(split[i:i+N]) for i in range(0, len(split), N)]            
-            # sentences = re.split(r'(?<=[,.])\s*', scripts[i]['Script'])
+            # sentences = re.split(r'(?<=[,.])\s*', script)
+            print(sentences)
             
             audio_length = get_audio_length(f'temp_auds/{name}_{ind}_English.mp3') * 1000  
             
-            total_script_length = len(scripts[ind]['Script'])  
+            total_script_length = len(script)  
             
             for sentence in sentences:
                 sentence_length = len(sentence)  
