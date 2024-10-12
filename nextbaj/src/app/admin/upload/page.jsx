@@ -12,7 +12,7 @@ function Admin() {
   const [numberOfSlides, setNumberOfSlides] = useState(10)
   const [processId, setProcessId] = useState()
   const [height, setHeight] = useState(960)
-  const [width, setWidth] = useState(540)
+  const [width, setWidth] = useState(544)
   const [captions, setCaptions] = useState(true)
   const [languages, setLanguages] = useState(["English"])
 
@@ -39,32 +39,32 @@ function Admin() {
     formData.append("pdf", selectedFile)
 
     try {
-      // const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/get_script`, {
-      //   cache: "force-cache",
-      //   method: "POST",
-      //   body: formData,
-      // })
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/get_script`, {
+        cache: "force-cache",
+        method: "POST",
+        body: formData,
+      })
 
-      // if (response.ok) {
-      //   const data = await response.json()
-      //   console.log(data)
-      //   setScripts(data.scripts)
-      //   setProcessId(data.processId)
-      // }
+      if (response.ok) {
+        const data = await response.json()
+        console.log(data)
+        setScripts(data.scripts)
+        setProcessId(data.processId)
+      }
 
-      setScripts([
-        {
-          Title: "Entry and Renewal Age",
-          Script:
-            "The entry age for our insurance policies is set at 18 to 65 years for adults and 3 months to 21 years for dependent children. Our policies typically come with a lifetime renewal benefit, ensuring continued coverage under normal circumstances, barring issues related to fraud or moral hazard.",
-        },
-        {
-          Title: "Hospital Cash Daily Allowance Policy",
-          Script:
-            "Our Hospital Cash Daily Allowance Policy protects you and your family from financial burdens during hospitalization. It pays a daily benefit amount to cover incidental expenses, providing peace of mind when you need it most. Coverage duration can be for 30 or 60 days within the policy period.",
-        },
-      ])
-      setProcessId("1234")
+      // setScripts([
+      //   {
+      //     Title: "Entry and Renewal Age",
+      //     Script:
+      //       "The entry age for our insurance policies is set at 18 to 65 years for adults and 3 months to 21 years for dependent children. Our policies typically come with a lifetime renewal benefit, ensuring continued coverage under normal circumstances, barring issues related to fraud or moral hazard.",
+      //   },
+      //   {
+      //     Title: "Hospital Cash Daily Allowance Policy",
+      //     Script:
+      //       "Our Hospital Cash Daily Allowance Policy protects you and your family from financial burdens during hospitalization. It pays a daily benefit amount to cover incidental expenses, providing peace of mind when you need it most. Coverage duration can be for 30 or 60 days within the policy period.",
+      //   },
+      // ])
+      setProcessId("4321")
     } catch (error) {
       localStorage.removeItem("ttvUploadTaskId")
       setUploadStatus("Error uploading PDF. Please try again.")
@@ -172,7 +172,7 @@ function Admin() {
               <div className="inline-flex rounded-md mr-3" role="group">
                 <button
                   onClick={() => {
-                    setWidth(540)
+                    setWidth(544)
                     setHeight(960)
                   }}
                   type="button"
@@ -182,7 +182,7 @@ function Admin() {
                 <button
                   onClick={() => {
                     setWidth(950)
-                    setHeight(540)
+                    setHeight(544)
                   }}
                   type="button"
                   className="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-e-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white">
