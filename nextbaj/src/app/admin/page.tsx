@@ -10,10 +10,12 @@ import {
   useUser
 } from '@clerk/nextjs'
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 function Home() {
   const { isSignedIn, isLoaded, user } = useUser();
   const [message, setMessage] = useState('');
+  const router = useRouter();
 
   useEffect(() => {
     const createUserInBackend = async () => {
@@ -46,6 +48,10 @@ function Home() {
     createUserInBackend();
   }, [isSignedIn, isLoaded, user]);
 
+  const handleGetStarted = () => {
+    router.push('/admin/videos');
+  };
+
   return (
     <>
       <div className="flex-grow flex flex-col items-center justify-center p-10 text-center">
@@ -59,12 +65,12 @@ function Home() {
           <h2 className="text-3xl font-semibold text-blue-700 mb-4">
             Your Journey Starts Here
           </h2>
-          <div className="flex items-center justify-center p-4 bg-blue-50 rounded-lg border-2 border-blue-300 shadow-inner">
-            <span className="mr-2 text-blue-700 font-semibold">Username:</span>
-            <div className="bg-white px-3 py-2 rounded-md shadow-sm">
-              <Username />
-            </div>
-          </div>
+          <button
+            onClick={handleGetStarted}
+            className="mt-4 px-6 py-3 bg-blue-600 text-white font-semibold rounded-full hover:bg-blue-700 transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+          >
+            Get Started
+          </button>
           <p className="mt-6 text-gray-600">
             Join us in shaping the future of technology and creativity.
           </p>
@@ -74,7 +80,6 @@ function Home() {
         <p>&copy; 2024 HackrX. All rights reserved.</p>
       </footer>
     </>
-
   );
 }
 
