@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 
 export default function UserQuiz() {
+  console.log('asdf')
   const searchParams = useSearchParams(); // Access search parameters
   const video_name = searchParams.get("video_name"); // Get video_name from search params
 
@@ -89,7 +90,7 @@ export default function UserQuiz() {
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-r from-blue-50 to-blue-100">
-      <Navbar />
+
       <div className="flex-grow flex flex-col items-center justify-center p-8">
         {quizData.length > 0 && (
           <div className="w-full max-w-xl p-8 bg-white shadow-lg rounded-lg">

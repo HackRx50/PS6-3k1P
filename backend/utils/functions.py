@@ -60,7 +60,7 @@ async def gen_and_save_quiz(script_compiled, name):
     await upload_quiz_data(parsed_quiz_data, name)
 
 async def generate_image_from_text(prompt, height, width):
-    prompt = prompt + " araminta_illus illustration style"
+    prompt = prompt + "realistic style"
     
     API_URL = "https://api-inference.huggingface.co/models/black-forest-labs/FLUX.1-dev"
     # API_URL = "https://api-inference.huggingface.co/models/alvdansen/softserve_anime"  # anime
@@ -292,7 +292,7 @@ async def clear_temp_folders():
         for file in os.listdir(IMGS_FOLDER):
             os.remove(os.path.join(IMGS_FOLDER, file))
     else:
-        os.makedirs(IMGS_FOLDER)
+        os. makedirs(IMGS_FOLDER)
 
     if os.path.exists(AUDS_FOLDER):
         for file in os.listdir(AUDS_FOLDER):
