@@ -57,7 +57,7 @@ def combine_videos(video_folder, audio_folder, output_filename="combined_video_2
     video_with_audio = final_clip.set_audio(AudioFileClip(temp_audio_path))
     
     # Write the combined video with adjusted audio to a file
-    video_with_audio.write_videofile(output_filename, codec="libx264", audio_codec="aac")
+    video_with_audio.write_videofile(output_filename, codec="libx264", audio_codec="aac", threads=4, preset="ultrafast")
 
     # Close the clips to release memory
     for clip in clips:
