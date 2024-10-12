@@ -13,13 +13,15 @@ from fastapi import (BackgroundTasks, Depends, FastAPI, File, Form,
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
+
 from utils.functions import *
+from utils.new_funcs import gengen, gen_script_and_choose_vid
 from utils.youtube import *
 
 load_dotenv()
 prepare_folders()
 
-app = FastAPI()
+app = FastAPI() 
 
 app.add_middleware(
     CORSMiddleware,
@@ -80,9 +82,9 @@ async def get_script_route(slides: int = Form(...), pdf: UploadFile = File(...))
         buffer.write(await pdf.read())
 
     # scripts = await get_script_from_pdf(file_path, slides)
-    scripts = await gen_script_and_choose_vid(file_path, slides)
+    scripts, chosen = await gen_script_and_choose_vid(file_path, slides)
 
-    return {"scripts": scripts, "processId": str(uuid.uuid4())}
+    return {"scripts": scripts, "processId": str(uuid.uuid4()), "chosen":chosen}
 
 
 @app.post('/generate_image')
@@ -107,7 +109,8 @@ async def generate_video_route(videoRequest: VideoRequest):
             raise HTTPException(
                 status_code=400, detail="Invalid request. VideoRequest is required.")
 
-        await generate_video(videoRequest.scripts, videoRequest.processId, videoRequest.captions, videoRequest.languages)
+        await gengen(videoRequest.scripts, videoRequest.processId, videoRequest.chosen, videoRequest.languages)
+        
         return {"status": "done"}
     except Exception as e:
         print(e)

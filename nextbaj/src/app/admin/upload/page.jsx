@@ -21,14 +21,16 @@ function Admin() {
   const [uploadStatus, setUploadStatus] = useState("")
   const [selectedCard, setSelectedCard] = useState(0)
   const [numberOfSlides, setNumberOfSlides] = useState(45)
-  const [processId, setProcessId] = useState()
+  const [processId, setProcessId] = useState(Math.floor(Math.random() * 1000000))
   const [height, setHeight] = useState(960)
   const [width, setWidth] = useState(544)
-  const [captions, setCaptions] = useState(true)
-  const [languages, setLanguages] = useState(["English"])
+  const [chosen, setChosen] = useState(true)
+  const [languages, setLanguages] = useState(["english"])
 
   const [scripts, setScripts] = useState([])
   const [images, setImages] = useState()
+
+  console.log(processId)
 
   const handleFileChange = e => {
     setSelectedFile(e.target.files[0])
@@ -59,6 +61,7 @@ function Admin() {
       if (response.ok) {
         const data = await response.json()
         console.log(data)
+        setChosen(data.chosen)
         setScripts(data.scripts)
         setProcessId(data.processId)
       }
@@ -75,7 +78,6 @@ function Admin() {
       //       "Our Hospital Cash Daily Allowance Policy protects you and your family from financial burdens during hospitalization. It pays a daily benefit amount to cover incidental expenses, providing peace of mind when you need it most. Coverage duration can be for 30 or 60 days within the policy period.",
       //   },
       // ])
-      setProcessId("4321")
     } catch (error) {
       localStorage.removeItem("ttvUploadTaskId")
       setUploadStatus("Error uploading PDF. Please try again.")
@@ -200,14 +202,57 @@ function Admin() {
                   Horizontal
                 </button>
                 </div>
+
+                <div className="ml-4 grid grid-cols-8 gap-4 rounded-md border-2 py-1 px-2">
+                {LANGUAGES.map((language, index) => (
+                  <div className="flex flex-row" key={index}>
+                    <input
+                      id={`language-${index}`}
+                      type="checkbox"
+                      className="mr-2 my-auto"
+                      checked={languages.includes(language)}
+                      onChange={e => {
+                        if (e.target.checked) {
+                          setLanguages([...languages, language])
+                        } else {
+                          setLanguages(languages.filter(l => l !== language))
+                        }
+                      }}
+                    />
+                    <label htmlFor={`language-${index}`} className="my-auto text-gray-700">
+                      {language.charAt(0).toUpperCase() + language.slice(1)}
+                    </label>
+                  </div>
+                ))}
+              </div>
+
             </div>
 
-            <button
+            {/* <button
               onClick={() => {
                 setImages([])
               }}
               className="w-full px-4 py-2 bg-indigo-600 text-white rounded-md mb-4 hover:bg-indigo-700 transition duration-300">
               Generate Images
+            </button> */}
+            <button
+              onClick={() => {
+                fetch(`${process.env.NEXT_PUBLIC_API_URL}/generate_video`, {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({
+                    processId: processId,
+                    scripts: scripts,
+                    chosen: chosen,
+                    languages: languages,
+                  }),
+                })
+                console.log("Generate Video")
+              }}
+              className="w-full px-4 py-2 bg-indigo-600 text-white rounded-md mb-4 hover:bg-indigo-700 transition duration-300">
+              Generate Video
             </button>
           </div>
         )}
@@ -223,19 +268,6 @@ function Admin() {
 
 
             <div className="flex mb-4">
-              <div className="ml-4 flex items-center rounded-md border-2 py-1 px-2">
-                <input
-                  id="captions"
-                  type="checkbox"
-                  className="mr-2"
-                  checked={captions}
-                  onChange={e => setCaptions(e.target.checked)}
-                />
-                <label htmlFor="captions" className="text-gray-700">
-                  Captions
-                </label>
-              </div>
-
               <div className="ml-4 grid grid-cols-9 gap-4 rounded-md border-2 py-1 px-2">
                 {LANGUAGES.map((language, index) => (
                   <div className="flex flex-row" key={index}>
@@ -270,7 +302,7 @@ function Admin() {
                   body: JSON.stringify({
                     processId: processId,
                     scripts: scripts,
-                    captions: captions,
+                    chosen: chosen,
                     languages: languages,
                   }),
                 })
@@ -281,6 +313,7 @@ function Admin() {
             </button>
           </>
         )}
+
 
         {uploadStatus && <p className="mt-4 text-center text-gray-600">{uploadStatus}</p>}
       </div>

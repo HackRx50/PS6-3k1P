@@ -3,6 +3,9 @@ from moviepy.editor import (AudioFileClip, CompositeAudioClip, VideoFileClip,
 
 from google.cloud import translate_v2 as translate
 from google.cloud import texttospeech
+from google.oauth2 import service_account
+
+
 import subprocess
 from pydub.utils import mediainfo
 import json
@@ -54,7 +57,7 @@ async def classify_vid_genre(pdf_content):
     return ans
 
 async def gen_script_and_choose_vid(pdf_content, n):
-        
+
     description_dict = {
         "Car": {
             "vid1": "a man carefully takes care of his posh car by cleaning the window sill with his hands",
@@ -79,8 +82,13 @@ async def gen_script_and_choose_vid(pdf_content, n):
             "vid5": "heavy rains drowns a car"
         }
     }
-    
 
+    file_folder_dict = {
+        "Car":"car",
+        "Health":"hospital",
+        "Daily Needs":"dailyNeeds"
+    }
+    
     chosen = await classify_vid_genre(pdf_content=pdf_content)
     print(chosen)
     
@@ -91,13 +99,15 @@ async def gen_script_and_choose_vid(pdf_content, n):
         f'''From the content,make script for a concise and interesting video while keeping in mind that multiple corresponding videos will support each subscript.The description of the videos are as following. {desc_dict} The script must have a storyline and be written keeping in mind the description of video. Do not use vid description to write the script, just use it to choose. The narrative should mention the product as the one that solves the problem. The entire script generated should be such that the time taken to speak collection of all subscripts is less than {n} seconds. Accordingly choose number of scripts. Use simpler language, make it sound more natural like someone is narrating a story. The time taken to speak each subscript should be less than 10 seconds.  The subscripts must collectively include all the important information in content for any customer. The answer should contain the subscript to be spoken and corresponding vid. Format the answer only as a list of json objects with just 2 key called Subscript and Video. Only give the json. No emojis. '''
 
     ans = await chat_completion(prompt)
+    print('asdf', ans)
+
     ans = ans.strip("```")
     ans = ans.split("json")[1]
     ans = ans.replace("\n", "")
 
     script_vid_slides = json.loads(ans)
 
-    return script_vid_slides
+    return script_vid_slides, file_folder_dict.get(chosen)
 
 def gen_and_save_srt(scripts, name):
     print(scripts)
@@ -205,8 +215,12 @@ async def gen_and_save_audio(script, file_path, language):
     with open(f'./{file_path}_{language}.mp3', 'wb') as f:
         f.write(response.audio_content)
 
-async def gengen(scripts, processId, captions, languages):
+async def gengen(scripts, processId, chosen, languages):
+    print('called', scripts)
     try:
+        for script in scripts:
+            script['Script'] = script.pop('Subscript')
+
         for i, language in enumerate(languages):
             for j, script in enumerate(scripts):
                 await gen_and_save_audio(script['Script'], f'temp_auds/{processId}_{j}', language)
@@ -214,7 +228,7 @@ async def gengen(scripts, processId, captions, languages):
         vids = []
         scs = []
         for sc in scripts:
-            vids.append(f"stockvids/car/{sc['Video']}.mp4")
+            vids.append(f"stockvids/{chosen}/{sc['Video']}.mp4")
             scs.append(sc['Script'])
             
         gen_and_save_srt(scs, processId)
@@ -224,6 +238,8 @@ async def gengen(scripts, processId, captions, languages):
         
             await combcomb(vids, audios, f'vids/{processId}_{lang}_ttt')
             add_subtitle(f"vids/{processId}_{lang}_ttt.mp4", f"subtitles/{processId}.srt", f"vids/{processId}_{lang}.mp4")
+
+        
 
     except Exception as e:
         print(e)

@@ -18,7 +18,7 @@ Base = declarative_base()
 class VideoRequest(BaseModel):
     processId: str
     scripts: list
-    captions: bool
+    chosen: str
     languages: list[str]
 
 class ImageRequest(BaseModel):
