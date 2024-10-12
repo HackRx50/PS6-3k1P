@@ -7,11 +7,13 @@ import {
   SignInButton,
   SignedIn,
   SignedOut,
-  UserButton
+  UserButton,
+  useUser
 } from '@clerk/nextjs'
-import Username from "./Username"
 
 function Navbar() {
+  const { user } = useUser();
+
   return (
     <nav className="bg-blue-800 p-4 shadow-md">
       <div className="container mx-auto flex justify-between items-center">
@@ -37,7 +39,7 @@ function Navbar() {
           <SignedIn>
             <div className="flex items-center space-x-4">
               <UserButton />
-              <Username className="text-white" />
+              <span className="text-white">{user?.fullName || 'Anonymous User'}</span>
             </div>
           </SignedIn>
           <SignedOut>
