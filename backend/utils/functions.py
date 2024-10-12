@@ -268,6 +268,20 @@ async def get_script_from_pdf(file_path, n):
     pages = await get_main_content(pdf_content, n)
     return pages
 
+async def gen_script_and_choose_vid(pdf_content):
+    prompt = '''Think of yourself as an expert script writter for compeling social media video\n\nContent:'''+ pdf_content + "\n\n" + '''From the content,make script for a concise and interesting video while keeping in mind that multiple corresponding videos will support each subscript.The description of the videos are as following. vid1 description: a man carefully takes care of his posh car by cleaning the window sill with his hands. vid2 description: BMW car driving down the road. vid3 description: a car accident with a truck in the highway. vid4 description: a happy family enjoying in their car. The script must have a storyline and be written keeping in mind the description of video. Do not use vid description to write the script, just use it to choose. The narrative should mention the product as the one that solves the problem. The entire script generated should be in the form of 4 subscripts. Use simpler language, make it sound more natural like someone is narrating a story. The time taken to speak each subscript should be less than 10 seconds.  The subscripts must collectively include all the important information in content for any customer. The answer should contain the subscript to be spoken and corresponding vid. Format the answer only as a list of json objects with just 2 key called Subscript and Video. Only give the json. No emojis'''
+
+    ans = await chat_completion(prompt)
+    ans = ans.strip("```")
+    ans = ans.split("json")[1]
+    ans = ans.replace("\n", "")
+
+    script_vid_slides = json.loads(ans)
+
+    return script_vid_slides
+
+
+
 async def get_main_content(pdf_content, n):
     
     prompt = pdf_content + "\n\n" + f"Break down the content into {n} slides/pages and provide script for each slide. It must be a json list of objects with just 2 keys, Script and Title, nothing else"
