@@ -3,13 +3,24 @@
 import { useState } from "react"
 import ImageComp from "./ImageComp"
 
-const LANGUAGES = ["english", "hindi", "marathi", "tamil", "telugu", "kannada", "malayalam", "bengali", "gujarati", "punjabi"]
+const LANGUAGES = [
+  "english",
+  "hindi",
+  "marathi",
+  "tamil",
+  "telugu",
+  "kannada",
+  "malayalam",
+  "bengali",
+  "gujarati",
+  "punjabi",
+]
 
 function Admin() {
   const [selectedFile, setSelectedFile] = useState(null)
   const [uploadStatus, setUploadStatus] = useState("")
   const [selectedCard, setSelectedCard] = useState(0)
-  const [numberOfSlides, setNumberOfSlides] = useState(10)
+  const [numberOfSlides, setNumberOfSlides] = useState(45)
   const [processId, setProcessId] = useState()
   const [height, setHeight] = useState(960)
   const [width, setWidth] = useState(544)
@@ -86,7 +97,7 @@ function Admin() {
               <div className="flex flex-row">
                 {/* New Numeric Input for Number of Slides */}
                 <label htmlFor="number-of-slides" className="my-auto mr-2 block text-lg text-gray-700 font-semibold">
-                  Number of Slides:
+                  Duration of Video (seconds):
                 </label>
                 <input
                   id="number-of-slides"
@@ -98,12 +109,12 @@ function Admin() {
                 />
               </div>
               <div className="flex flex-row">
-                <label htmlFor="number-of-slides" className="my-auto block text-lg text-gray-700 font-semibold">
+                {/* <label htmlFor="number-of-slides" className="my-auto block text-lg text-gray-700 font-semibold">
                   Approximate Time:
                 </label>
                 <label htmlFor="number-of-slides" className="ml-2 my-auto block text-lg text-gray-700">
                   {numberOfSlides * 15} secs
-                </label>
+                </label> */}
               </div>
             </div>
             <div className="flex items-center justify-center w-full">
@@ -161,19 +172,19 @@ function Admin() {
               rows="4"
               className="mb-4 block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               placeholder="Write your thoughts here..."
-              value={scripts[selectedCard]["Script"]}
+              value={scripts[selectedCard]["Subscript"]}
               onChange={e => {
                 let temp = [...scripts]
-                temp[selectedCard]["Script"] = e.target.value
+                temp[selectedCard]["Subscript"] = e.target.value
                 setScripts(temp)
-              }}></textarea>
+                }}></textarea>
 
-            <div className="flex flex-row mb-4 gap-3">
-              <div className="inline-flex rounded-md mr-3" role="group">
+              <div className="flex flex-row mb-4 gap-3">
+                <div className="inline-flex rounded-md mr-3" role="group">
                 <button
                   onClick={() => {
-                    setWidth(544)
-                    setHeight(960)
+                  setWidth(544)
+                  setHeight(960)
                   }}
                   type="button"
                   className="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-s-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white">
@@ -181,38 +192,14 @@ function Admin() {
                 </button>
                 <button
                   onClick={() => {
-                    setWidth(950)
-                    setHeight(544)
+                  setWidth(950)
+                  setHeight(544)
                   }}
                   type="button"
                   className="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-e-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white">
                   Horizontal
                 </button>
-              </div>
-
-              <label htmlFor="height" className="my-auto block text-gray-700">
-                Height
-              </label>
-              <input
-                id="height"
-                type="number"
-                value={height}
-                onChange={e => setHeight(e.target.value)}
-                className="mt-1 block w-24 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                min="1" // Minimum value for height
-              />
-
-              <label htmlFor="width" className="my-auto block text-gray-700 ml-3">
-                Width
-              </label>
-              <input
-                id="width"
-                type="number"
-                value={width}
-                onChange={e => setWidth(e.target.value)}
-                className="mt-1 block w-24 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                min="1" // Minimum value for width
-              />
+                </div>
             </div>
 
             <button
@@ -227,12 +214,13 @@ function Admin() {
 
         {images && (
           <>
-            <div className="overflow-x-auto whitespace-nowrap mb-4">
+            {/* <div className="overflow-x-auto whitespace-nowrap mb-4">
               {scripts.length != 0 &&
                 scripts.map((card, index) => (
                   <ImageComp key={index} card={card} ind={index} processId={processId} height={height} width={width} />
                 ))}
-            </div>
+            </div> */}
+
 
             <div className="flex mb-4">
               <div className="ml-4 flex items-center rounded-md border-2 py-1 px-2">

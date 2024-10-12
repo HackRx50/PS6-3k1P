@@ -59,7 +59,13 @@ async def test_new_prompt():
   
   fdsa = await gen_script_and_choose_vid(asdf, 60)
   
-  print(fdsa)
+  scripts = []
+  for script in fdsa:
+    scripts.append(script['Subscript'])
+  
+  processId = '1234'
+  
+  await gen_and_save_audio(scripts, processId, language='english')
 
 
 if __name__=="__main__":

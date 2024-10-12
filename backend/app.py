@@ -79,9 +79,10 @@ async def get_script_route(slides: int = Form(...), pdf: UploadFile = File(...))
     with open(file_path, "wb") as buffer:
         buffer.write(await pdf.read())
 
-    scripts = await get_script_from_pdf(file_path, slides)
+    # scripts = await get_script_from_pdf(file_path, slides)
+    scripts = await gen_script_and_choose_vid(file_path, slides)
 
-    return {"scripts": scripts}
+    return {"scripts": scripts, "processId": str(uuid.uuid4())}
 
 
 @app.post('/generate_image')
