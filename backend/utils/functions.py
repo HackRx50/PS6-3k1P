@@ -298,8 +298,8 @@ async def gen_script_and_choose_vid(pdf_content, n):
 
     description_dict = {
         "Car": "vid1 description: a man carefully takes care of his posh car by cleaning the window sill with his hands. vid2 description: BMW car driving down the road. vid3 description: a car accident with a truck in the highway. vid4 description: a happy family enjoying in their car.",
-        "Health": "Resources and products focused on physical and mental well-being, medical care, and fitness.",
-        "Daily Needs": "Everyday essentials including groceries, personal care items, and household supplies."
+        "Health": "vid1 description: doctor treating a little girl, with mother by her side. vid2 description: people attending a funeral. vid3 description: cute baby playing with cake frosting in a lively family party. vid4 description: grandparents happily playing with grand children. vid5 description: surgeons treating a patient on an operation table. vid6 description: doctor discussing with family with patient in bed. vid7 description: analysing tax returns",
+        "Daily Needs": "vid1 description: a man is filling out bills. vid2 description: young boy gets injured and falls off the cycle, mother tends to him with a bandaid. vid3 description: a happy couple shops for groceries. vid4 description: working out in gym. vid5 description: heavy rains drowns a car"
     }
 
     chosen = classify_vid_genre(pdf_content=pdf_content)
