@@ -17,3 +17,15 @@ https://github.com/user-attachments/assets/0ff3a8a6-7e07-43a1-90d1-22085e2ea021
 
 
 https://github.com/user-attachments/assets/069f41b2-86cf-4ec7-9133-ead444ab0f05
+
+
+git remote add baj https://github.com/HackRx50/PS6-3k1P.git
+
+git remote remove origin
+
+git remote rename baj origin
+
+git remote -v
+
+git pull origin main
+

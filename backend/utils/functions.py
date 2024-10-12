@@ -22,6 +22,40 @@ from google.oauth2 import service_account
 IMGS_FOLDER = 'temp_imgs'
 AUDS_FOLDER = 'temp_auds'
 
+def stock_videos(video_folder, output_filename="combined_video.mp4", transition_duration=0.5):
+    # Get the paths of the video files
+    video_files = [
+        os.path.join(video_folder, "vid1.mp4"),
+        os.path.join(video_folder, "vid2.mp4"),
+        os.path.join(video_folder, "vid3.mp4"),
+        os.path.join(video_folder, "vid4.mp4")
+    ]
+    
+    # Ensure all video files exist
+    for video_file in video_files:
+        if not os.path.isfile(video_file):
+            raise FileNotFoundError(f"The video file {video_file} was not found. Please check the path: {video_file}")
+    
+    # Load all video clips and apply a crossfade transition to smooth out the transitions
+    clips = [VideoFileClip(video_file) for video_file in video_files]
+
+    # Apply crossfade to each clip to make the transitions smoother
+    # Each video will fade in for the duration specified in `transition_duration`
+    for i in range(1, len(clips)):
+        clips[i] = clips[i].crossfadein(transition_duration)
+
+    # Combine the video clips into one, with crossfade effect between them
+    final_clip = concatenate_videoclips(clips, method="compose", padding=-transition_duration)
+    
+    # Write the combined video to a file
+    final_clip.write_videofile(output_filename, codec="libx264", audio_codec="aac")
+
+    # Close the clips to release memory
+    for clip in clips:
+        clip.close()
+
+    print(f"Combined video saved as {output_filename}")
+
 async def gen_and_save_image(prompt, file_path, height, width):
     image_bytes = await generate_image_from_text(prompt, height, width)
     dataBytesIO = io.BytesIO(image_bytes)
@@ -134,7 +168,6 @@ async def gen_and_save_quiz(script_compiled, name):
     await upload_quiz_data(parsed_quiz_data, name)
 
 async def generate_image_from_text(prompt, height, width):
-    prompt = prompt + "realistic style"
     
     API_URL = "https://api-inference.huggingface.co/models/black-forest-labs/FLUX.1-dev"
     # API_URL = "https://api-inference.huggingface.co/models/alvdansen/softserve_anime"  # anime
@@ -142,7 +175,7 @@ async def generate_image_from_text(prompt, height, width):
 
     headers = {"Authorization": "Bearer " + os.environ['FLUX_API_KEY']}
     data = {
-        "inputs": "Soft Animation Style. "+prompt,
+        "inputs": "Ultra realistic. " + prompt,
         "parameters": {
             "height": height, "width": width
         }
@@ -174,9 +207,12 @@ async def chat_completion(prompt):
 
 async def generate_image(script, ind, processId, height, width):
     try:
-        prompt = "give just a short suitable prompt to give to an image generator as if talking to a 10 year old to create an image for the slide with this content: " + script
+        # prompt = "give just a short suitable prompt to give to an image generator as if talking to a 10 year old to create an image for the slide with this content: " + script
+        prompt = "give the shortest prompt to give to an image generator to generate a stock image for this content: " + script
         imp = await chat_completion(prompt)
         img_prompt = imp.strip('"')
+
+        print("img_prompt", img_prompt)
         
         img_path = f"temp_imgs/{processId}/{ind}"
         await gen_and_save_image(img_prompt, img_path, height, width)
@@ -185,9 +221,44 @@ async def generate_image(script, ind, processId, height, width):
         print(e)
         return e
 
-async def generate_video(script, processId, captions, languages):
+async def generate_video(scripts, processId, captions, languages):
     try:
-        pass
+        translation_language_codes = {
+            "hindi": "hi",
+            "marathi": "mr",
+            "tamil": "ta",
+            "telugu": "te",
+            "malayalam": "ml",
+            "kannada": "kn",
+            "bengali": "bn",
+            "punjabi": "pa",
+        }
+        
+        # for i, language in enumerate(languages):
+        #     for j, script in enumerate(scripts):
+        #         await gen_and_save_audio(script['Script'], f'temp_auds/{processId}_{j}', language)
+        
+        lang = 'marathi'
+
+        translation_language_code = translation_language_codes.get(lang.lower(), "hi")
+
+        lang_scripts = []
+        for script in scripts:
+            translated_script = await translate_text(script['Script'], translation_language_code)
+            lang_scripts.append(translated_script)
+        gen_and_save_srt(lang_scripts, f'{processId}_{lang}')
+        
+        # audios = [f'temp_auds/{processId}_{i}_{lang}.mp3' for i in range(len(scripts))]
+        # images = sorted([f"temp_imgs/{processId}/{f}" for f in os.listdir(f"temp_imgs/{processId}") if f.endswith('.png')])
+        
+        # print("audios", audios)
+        # print("images", images)
+        
+        
+        # # combine audio and video.
+        # await combine_audio_and_video(f'{processId}_{lang}', audios, images)
+        # add_subtitle(f'vids/{processId}_{lang}.mp4', f'subtitles/{processId}.srt', f'vids/{processId}_{lang}_final.mp4')
+        
     except Exception as e:
         print(e)
         return e
@@ -196,6 +267,35 @@ async def get_script_from_pdf(file_path, n):
     pdf_content = extract_text(file_path)
     pages = await get_main_content(pdf_content, n)
     return pages
+
+async def classify_vid_genre(pdf_content):
+    prompt="Content: "+pdf_content+"\nClassify the above into one of three option based on what it is about.the options are Car, Health and Daily Needs.The output should be ONLY one of the options, nothing else"
+    ans = await chat_completion(prompt)
+
+    return ans
+
+async def gen_script_and_choose_vid(pdf_content, n):
+
+    description_dict = {
+        "Car": "vid1 description: a man carefully takes care of his posh car by cleaning the window sill with his hands. vid2 description: BMW car driving down the road. vid3 description: a car accident with a truck in the highway. vid4 description: a happy family enjoying in their car.",
+        "Health": "Resources and products focused on physical and mental well-being, medical care, and fitness.",
+        "Daily Needs": "Everyday essentials including groceries, personal care items, and household supplies."
+    }
+
+    chosen = classify_vid_genre(pdf_content=pdf_content)
+
+    chosen_description = description_dict.get(chosen)
+
+    prompt = '''Think of yourself as an expert script writter for compeling social media video\n\nContent:'''+ pdf_content + "\n\n" + f'''From the content,make script for a concise and interesting video while keeping in mind that multiple corresponding videos will support each subscript.The description of the videos are as following. {chosen_description} The script must have a storyline and be written keeping in mind the description of video. Do not use vid description to write the script, just use it to choose. The narrative should mention the product as the one that solves the problem. The entire script generated should be such that the time taken to speak collection of all subscripts is less than {n} seconds. Accordingly choose number of scripts. Use simpler language, make it sound more natural like someone is narrating a story. The time taken to speak each subscript should be less than 10 seconds.  The subscripts must collectively include all the important information in content for any customer. The answer should contain the subscript to be spoken and corresponding vid. Format the answer only as a list of json objects with just 2 key called Subscript and Video. Only give the json. No emojis. '''
+
+    ans = await chat_completion(prompt)
+    ans = ans.strip("```")
+    ans = ans.split("json")[1]
+    ans = ans.replace("\n", "")
+
+    script_vid_slides = json.loads(ans)
+
+    return script_vid_slides
 
 async def get_main_content(pdf_content, n):
     
@@ -318,23 +418,15 @@ async def upload_quiz_data(parsed_quiz_data, name):
     except Exception as e:
         print(f"An error occurred: {e}")
 
-async def combine_audio_and_video(name):
-
-    audio_folder = "temp_auds"
-    image_folder = "temp_imgs"
-
-    audio_files = sorted([f for f in os.listdir(audio_folder) if f.endswith('.mp3') or f.endswith('.wav')])
-    image_files = sorted([f for f in os.listdir(image_folder) if f.endswith('.png')])
+async def combine_audio_and_video(name, audio_files, image_files):
 
     video_clips = []
 
-    for idx, audio_file in enumerate(audio_files):
-        audio_path = os.path.join(audio_folder, audio_file)
-        image_path = os.path.join(image_folder, f'{idx}.png')
+    for i, audio_file in enumerate(audio_files):
         
-        audio_clip = AudioFileClip(audio_path)
+        audio_clip = AudioFileClip(audio_file)
         
-        image_clip = ImageClip(image_path).set_duration(audio_clip.duration)
+        image_clip = ImageClip(image_files[i]).set_duration(audio_clip.duration)
         
         video_clip = image_clip.set_audio(audio_clip)
         
@@ -400,15 +492,23 @@ def get_audio_length(file_path):
 def gen_and_save_srt(scripts, name):
     cumulative_time_ms = 0  
     srt_entry_number = 1  
-    srt_file_path = f'tmp/{name}.srt'  
+    srt_file_path = f'subtitles/{name}.srt'  
 
-    with open(srt_file_path, 'w') as srt_file:  
-        for i in range(len(scripts)):
+    
+    with open(srt_file_path, 'w', encoding="utf-8") as srt_file:
+        for ind, script in enumerate(scripts):
             
-            sentences = re.split(r'(?<=[,.])\s*', scripts[i]['Script'])
+            N = 3
+            split = script.split(' ')
+            split = [word for word in split if word.strip()]
+
+            sentences = [' '.join(split[i:i+N]) for i in range(0, len(split), N)]            
+            # sentences = re.split(r'(?<=[,.])\s*', script)
+            print(sentences)
             
-            audio_length = get_audio_length(f'temp_auds/{i}.mp3') * 1000  
-            total_script_length = len(scripts[i]['Script'])  
+            audio_length = get_audio_length(f'temp_auds/{name}_{ind}_English.mp3') * 1000  
+            
+            total_script_length = len(script)  
             
             for sentence in sentences:
                 sentence_length = len(sentence)  
