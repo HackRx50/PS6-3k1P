@@ -31,6 +31,31 @@ async def translate_text(text, target_language):
 
     return translated_text
 
+async def gen_script_and_choose_vid(pdf_content, n):
+
+    description_dict = {
+        "Car": "vid1 description: a man carefully takes care of his posh car by cleaning the window sill with his hands. vid2 description: BMW car driving down the road. vid3 description: a car accident with a truck in the highway. vid4 description: a happy family enjoying in their car.",
+        "Health": "vid1 description: doctor treating a little girl, with mother by her side. vid2 description: people attending a funeral. vid3 description: cute baby playing with cake frosting in a lively family party. vid4 description: grandparents happily playing with grand children. vid5 description: surgeons treating a patient on an operation table. vid6 description: doctor discussing with family with patient in bed. vid7 description: analysing tax returns",
+        "Daily Needs": "vid1 description: a man is filling out bills. vid2 description: young boy gets injured and falls off the cycle, mother tends to him with a bandaid. vid3 description: a happy couple shops for groceries. vid4 description: working out in gym. vid5 description: heavy rains drowns a car"
+    }
+
+    chosen = await classify_vid_genre(pdf_content=pdf_content)
+    print(chosen)
+
+    chosen_description = description_dict.get(chosen)
+
+    prompt = '''Think of yourself as an expert script writter for compeling social media video\n\nContent:''' + pdf_content + "\n\n" + \
+        f'''From the content,make script for a concise and interesting video while keeping in mind that multiple corresponding videos will support each subscript.The description of the videos are as following. {chosen_description} The script must have a storyline and be written keeping in mind the description of video. Do not use vid description to write the script, just use it to choose. The narrative should mention the product as the one that solves the problem. The entire script generated should be such that the time taken to speak collection of all subscripts is less than {n} seconds. Accordingly choose number of scripts. Use simpler language, make it sound more natural like someone is narrating a story. The time taken to speak each subscript should be less than 10 seconds.  The subscripts must collectively include all the important information in content for any customer. The answer should contain the subscript to be spoken and corresponding vid. Format the answer only as a list of json objects with just 2 key called Subscript and Video. Only give the json. No emojis. '''
+
+    ans = await chat_completion(prompt)
+    ans = ans.strip("```")
+    ans = ans.split("json")[1]
+    ans = ans.replace("\n", "")
+
+    script_vid_slides = json.loads(ans)
+
+    return script_vid_slides
+
 def gen_and_save_srt(scripts, name):
     cumulative_time_ms = 0
     srt_entry_number = 1
