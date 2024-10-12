@@ -11,22 +11,22 @@ export default function ImageComp({ card, ind, processId, height, width }: { car
   const [imageUrl, setImageUrl] = useState<string | null>(null)
 
   useEffect(() => {
-    // fetch(process.env.NEXT_PUBLIC_API_URL + "/generate_image", {
-    //   method: "POST",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //   },
-    //   body: JSON.stringify({ script: card.Script, ind: ind, processId: processId, height: height, width: width }),
-    // })
-    //   .then(response => response.json())
-    //   .then(data => {
-    //     setImageUrl(process.env.NEXT_PUBLIC_API_URL + "/get_image?filename=" + processId + "/" + ind + ".png")
-    //   })
-    //   .catch(error => {
-    //     console.error("Error fetching image:", error)
-    //   })
+    fetch(process.env.NEXT_PUBLIC_API_URL + "/generate_image", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ script: card.Script, ind: ind, processId: processId, height: height, width: width }),
+    })
+      .then(response => response.json())
+      .then(data => {
+        setImageUrl(process.env.NEXT_PUBLIC_API_URL + "/get_image?filename=" + processId + "/" + ind + ".png")
+      })
+      .catch(error => {
+        console.error("Error fetching image:", error)
+      })
 
-    setImageUrl(process.env.NEXT_PUBLIC_API_URL + '/get_image?filename=' + processId + '/' + ind + '.png');
+    // setImageUrl(process.env.NEXT_PUBLIC_API_URL + '/get_image?filename=' + processId + '/' + ind + '.png');
   }, [card.Script, ind, processId])
 
   return (

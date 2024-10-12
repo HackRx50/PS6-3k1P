@@ -16,7 +16,7 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
 class VideoRequest(BaseModel):
-    preocessId: str
+    processId: str
     scripts: list
     captions: bool
     languages: list[str]

@@ -134,7 +134,6 @@ async def gen_and_save_quiz(script_compiled, name):
     await upload_quiz_data(parsed_quiz_data, name)
 
 async def generate_image_from_text(prompt, height, width):
-    prompt = prompt + "realistic style"
     
     API_URL = "https://api-inference.huggingface.co/models/black-forest-labs/FLUX.1-dev"
     # API_URL = "https://api-inference.huggingface.co/models/alvdansen/softserve_anime"  # anime
@@ -142,7 +141,7 @@ async def generate_image_from_text(prompt, height, width):
 
     headers = {"Authorization": "Bearer " + os.environ['FLUX_API_KEY']}
     data = {
-        "inputs": "Soft Animation Style. "+prompt,
+        "inputs": "Ultra realistic. " + prompt,
         "parameters": {
             "height": height, "width": width
         }
@@ -174,9 +173,12 @@ async def chat_completion(prompt):
 
 async def generate_image(script, ind, processId, height, width):
     try:
-        prompt = "give just a short suitable prompt to give to an image generator as if talking to a 10 year old to create an image for the slide with this content: " + script
+        # prompt = "give just a short suitable prompt to give to an image generator as if talking to a 10 year old to create an image for the slide with this content: " + script
+        prompt = "give the shortest prompt to give to an image generator to generate a stock image for this content: " + script
         imp = await chat_completion(prompt)
         img_prompt = imp.strip('"')
+
+        print("img_prompt", img_prompt)
         
         img_path = f"temp_imgs/{processId}/{ind}"
         await gen_and_save_image(img_prompt, img_path, height, width)
@@ -185,9 +187,28 @@ async def generate_image(script, ind, processId, height, width):
         print(e)
         return e
 
-async def generate_video(script, processId, captions, languages):
+async def generate_video(scripts, processId, captions, languages):
     try:
-        pass
+        # generate audios from script and in a list of languages
+        
+        # for i, language in enumerate(languages):
+        #     for j, script in enumerate(scripts):
+        #         await gen_and_save_audio(script['Script'], f'temp_auds/{processId}_{j}', language)
+        
+        lang = 'hindi'
+        
+        audios = [f'temp_auds/{processId}_{i}_{lang}.mp3' for i in range(len(scripts))]
+        images = sorted([f"temp_imgs/{processId}/{f}" for f in os.listdir(f"temp_imgs/{processId}") if f.endswith('.png')])
+        
+        print("audios", audios)
+        print("images", images)
+        
+        
+        
+        # combine audio and video.
+        await combine_audio_and_video(f'{processId}_{lang}', audios, images)
+        
+        
     except Exception as e:
         print(e)
         return e
@@ -318,23 +339,15 @@ async def upload_quiz_data(parsed_quiz_data, name):
     except Exception as e:
         print(f"An error occurred: {e}")
 
-async def combine_audio_and_video(name):
-
-    audio_folder = "temp_auds"
-    image_folder = "temp_imgs"
-
-    audio_files = sorted([f for f in os.listdir(audio_folder) if f.endswith('.mp3') or f.endswith('.wav')])
-    image_files = sorted([f for f in os.listdir(image_folder) if f.endswith('.png')])
+async def combine_audio_and_video(name, audio_files, image_files):
 
     video_clips = []
 
-    for idx, audio_file in enumerate(audio_files):
-        audio_path = os.path.join(audio_folder, audio_file)
-        image_path = os.path.join(image_folder, f'{idx}.png')
+    for i, audio_file in enumerate(audio_files):
         
-        audio_clip = AudioFileClip(audio_path)
+        audio_clip = AudioFileClip(audio_file)
         
-        image_clip = ImageClip(image_path).set_duration(audio_clip.duration)
+        image_clip = ImageClip(image_files[i]).set_duration(audio_clip.duration)
         
         video_clip = image_clip.set_audio(audio_clip)
         
