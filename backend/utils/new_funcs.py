@@ -1,145 +1,282 @@
+from moviepy.editor import (AudioFileClip, CompositeAudioClip, VideoFileClip,
+                            concatenate_audioclips, concatenate_videoclips)
+
+from google.cloud import translate_v2 as translate
+from google.cloud import texttospeech
 import subprocess
-from moviepy.editor import VideoFileClip, AudioFileClip, concatenate_videoclips, CompositeAudioClip
-from typing import List
-import cloudinary
-import cloudinary.uploader
-import cloudinary.api
-from typing import List
+from pydub.utils import mediainfo
+import json
+import asyncio
+from openai import OpenAI
 
-def combine_media(videos, audios, bg_music, captions, output):
-    """
-    Combines 4 videos, 4 audio tracks, background music, and captions into one final video.
 
-    Parameters:
-    videos (list): List of 4 video file paths.
-    audios (list): List of 4 audio file paths.
-    bg_music (str): Path to the background music file.
-    captions (str): Path to the captions/subtitles file (e.g., .srt file).
-    output (str): Path for the final output video.
-    """
-    
-    if len(videos) != 4 or len(audios) != 4:
-        raise ValueError("You must provide exactly 4 videos and 4 audios.")
-    
-    # FFmpeg command for concatenating the videos and mixing the audios
-    command = [
-        'ffmpeg',
-        # Input videos
-        '-i', videos[0], '-i', videos[1], '-i', videos[2], '-i', videos[3],
-        # Input audios
-        '-i', audios[0], '-i', audios[1], '-i', audios[2], '-i', audios[3],
-        # Input background music
-        '-i', bg_music,
-        # FFmpeg filter complex to handle video concat, audio mix, and subtitles
-        '-filter_complex', (
-            '[0:v][1:v][2:v][3:v]concat=n=4:v=1:a=0[v];'  # Concatenate videos
-            '[4:a][5:a][6:a][7:a]amix=inputs=4:duration=longest[a_mix];'  # Mix audios
-            '[a_mix][8:a]amix=inputs=2:duration=longest[a_final]'  # Add background music to the mix
-        ),
-        # Map the final video and audio streams
-        '-map', '[v]',
-        '-map', '[a_final]',
-        # Include subtitles (captions) if provided
-        # '-vf', f"subtitles={captions}",
+
+def format_time(s):
+    hours = int(s // 3600)
+    minutes = int((s % 3600) // 60)
+    seconds = int(s % 60)
+    milliseconds = int((s - int(s)) * 1000)
+    return f"{hours:02}:{minutes:02}:{seconds:02},{milliseconds:03}"
+
+def get_audio_length(file_path):
+    audio_info = mediainfo(file_path)
+    return float(audio_info['duration'])
+
+async def translate_text(text, target_language):
+
+    credentials1 = service_account.Credentials.from_service_account_file(
+        './service.json')
+
+    translate_client = translate.Client(credentials=credentials1)
+
+    # Translate the text into the target language
+    result = translate_client.translate(text, target_language=target_language)
+    translated_text = result["translatedText"]
+    # print(f"Original Text: {text}")
+    # print(f"Translated Text ({target_language}): {translated_text}")
+
+    return translated_text
+
+async def chat_completion(prompt):
+    client = OpenAI()
+    completion = await asyncio.to_thread(client.chat.completions.create,
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "user", "content": prompt}
+        ]
+    )
+    return completion.choices[0].message.content
+
+async def classify_vid_genre(pdf_content):
+    prompt = "Content: "+pdf_content+"\nClassify the above into one of three option based on what it is about.the options are Car, Health and Daily Needs.The output should be ONLY one of the options, nothing else"
+    ans = await chat_completion(prompt)
+
+    return ans
+
+async def gen_script_and_choose_vid(pdf_content, n):
         
-        # Output file
-        output
+    description_dict = {
+        "Car": {
+            "vid1": "a man carefully takes care of his posh car by cleaning the window sill with his hands",
+            "vid2": "BMW car driving down the road",
+            "vid3": "a car accident with a truck in the highway",
+            "vid4": "a happy family enjoying in their car"
+        },
+        "Health": {
+            "vid1": "doctor treating a little girl, with mother by her side",
+            "vid2": "people attending a funeral",
+            "vid3": "cute baby playing with cake frosting in a lively family party",
+            "vid4": "grandparents happily playing with grand children",
+            "vid5": "surgeons treating a patient on an operation table",
+            "vid6": "doctor discussing with family with patient in bed",
+            "vid7": "analysing tax returns"
+        },
+        "Daily Needs": {
+            "vid1": "a man is filling out bills",
+            "vid2": "young boy gets injured and falls off the cycle, mother tends to him with a bandaid",
+            "vid3": "a happy couple shops for groceries",
+            "vid4": "working out in gym",
+            "vid5": "heavy rains drowns a car"
+        }
+    }
+    
+
+    chosen = await classify_vid_genre(pdf_content=pdf_content)
+    print(chosen)
+    
+    desc_dict = json.dumps(description_dict[chosen])
+    print(desc_dict)
+
+    prompt = '''Think of yourself as an expert script writter for compeling social media video\n\nContent:''' + pdf_content + "\n\n" + \
+        f'''From the content,make script for a concise and interesting video while keeping in mind that multiple corresponding videos will support each subscript.The description of the videos are as following. {desc_dict} The script must have a storyline and be written keeping in mind the description of video. Do not use vid description to write the script, just use it to choose. The narrative should mention the product as the one that solves the problem. The entire script generated should be such that the time taken to speak collection of all subscripts is less than {n} seconds. Accordingly choose number of scripts. Use simpler language, make it sound more natural like someone is narrating a story. The time taken to speak each subscript should be less than 10 seconds.  The subscripts must collectively include all the important information in content for any customer. The answer should contain the subscript to be spoken and corresponding vid. Format the answer only as a list of json objects with just 2 key called Subscript and Video. Only give the json. No emojis. '''
+
+    ans = await chat_completion(prompt)
+    ans = ans.strip("```")
+    ans = ans.split("json")[1]
+    ans = ans.replace("\n", "")
+
+    script_vid_slides = json.loads(ans)
+
+    return script_vid_slides
+
+def gen_and_save_srt(scripts, name):
+    print(scripts)
+    cumulative_time_ms = 0
+    srt_entry_number = 1
+    srt_file_path = f'subtitles/{name}.srt'
+
+    with open(srt_file_path, 'w', encoding="utf-8") as srt_file:
+        for ind, script in enumerate(scripts):
+            N = 3
+            split = script.split(' ')
+            split = [word for word in split if word.strip()]
+
+            sentences = [' '.join(split[i:i+N])
+                         for i in range(0, len(split), N)]
+            # sentences = re.split(r'(?<=[,.])\s*', script)
+
+            audio_length = get_audio_length(
+                f'temp_auds/{name}_{ind}_english.mp3') * 1000
+
+            total_script_length = len(script)
+
+            for sentence in sentences:
+                sentence_length = len(sentence)
+
+                caption_duration_ms = (
+                    sentence_length / total_script_length) * audio_length
+
+                start_time_ms = cumulative_time_ms
+                end_time_ms = start_time_ms + caption_duration_ms
+
+                srt_entry = f"{srt_entry_number}\n{format_time(start_time_ms / 1000)} --> {format_time(end_time_ms / 1000)}\n{sentence}\n\n"
+                srt_file.write(srt_entry)
+                srt_entry_number += 1
+
+                cumulative_time_ms += caption_duration_ms
+
+async def gen_and_save_audio(script, file_path, language):
+
+    if (language != "english"):
+        translation_language_codes = {
+            "hindi": "hi",
+            "marathi": "mr",
+            "tamil": "ta",
+            "telugu": "te",
+            "malayalam": "ml",
+            "kannada": "kn",
+            "bengali": "bn",
+            "punjabi": "pa",
+        }
+
+        translation_language_code = translation_language_codes.get(
+            language.lower(), "hi")
+
+        script = await translate_text(script, translation_language_code)
+
+    credentials2 = service_account.Credentials.from_service_account_file(
+        "./service2.json")
+
+    # Initialize the Text-to-Speech client with credentials
+    client = texttospeech.TextToSpeechClient(credentials=credentials2)
+
+    # Set the text input to be synthesized
+    synthesis_input = texttospeech.SynthesisInput(text=script)
+
+    language_codes = {
+        "english": "en-US",
+        "hindi": "hi-IN",
+        "marathi": "mr-IN",
+        "tamil": "ta-IN",
+        "telugu": "te-IN",
+        "malayalam": "ml-IN",
+        "kannada": "kn-IN",
+        "bengali": "bn-IN",
+        "punjabi": "pa-IN",
+    }
+
+    # Get the language code from the dictionary
+    tts_language_code = language_codes.get(language.lower(), "en-IN")
+
+    # Build the voice request, select the language code and voice
+    voice = texttospeech.VoiceSelectionParams(
+        language_code=tts_language_code,
+        ssml_gender=texttospeech.SsmlVoiceGender.NEUTRAL
+    )
+
+    # Select the audio configuration
+    audio_config = texttospeech.AudioConfig(
+        audio_encoding=texttospeech.AudioEncoding.MP3
+    )
+
+    # Perform the text-to-speech request
+    response = client.synthesize_speech(
+        input=synthesis_input, voice=voice, audio_config=audio_config
+    )
+
+    # client = OpenAI()
+    # # Run the synchronous call in a separate thread
+    # response = await asyncio.to_thread(client.audio.speech.create,
+    #     model="tts-1",
+    #     voice="shimmer",
+    #     input=script
+    # )
+
+    with open(f'./{file_path}_{language}.mp3', 'wb') as f:
+        f.write(response.audio_content)
+
+async def gengen(scripts, processId, captions, languages):
+    try:
+        for i, language in enumerate(languages):
+            for j, script in enumerate(scripts):
+                await gen_and_save_audio(script['Script'], f'temp_auds/{processId}_{j}', language)
+
+        vids = []
+        scs = []
+        for sc in scripts:
+            vids.append(f"stockvids/car/{sc['Video']}.mp4")
+            scs.append(sc['Script'])
+            
+        gen_and_save_srt(scs, processId)
+        
+        for lang in languages:
+            audios = [f'temp_auds/{processId}_{i}_{lang}.mp3' for i in range(len(scripts))]
+        
+            await combcomb(vids, audios, f'vids/{processId}_{lang}_ttt')
+            add_subtitle(f"vids/{processId}_{lang}_ttt.mp4", f"subtitles/{processId}.srt", f"vids/{processId}_{lang}.mp4")
+
+    except Exception as e:
+        print(e)
+        return e
+
+async def combcomb(vids, auds, name):
+    bajaj = "stockvids/bajaj/bajaj_logo.mp4"
+    bg_aud = "temp_auds/bg_upbeat.mp3"
+
+    clips = []
+    for vid in vids:
+        clips.append(VideoFileClip(
+            vid, target_resolution=(720, 1280), audio=False))
+
+    clip3 = VideoFileClip(bajaj, target_resolution=(720, 1280), audio=False)
+    clips.append(clip3)
+
+    # Combine the two video clips
+    final_clip = concatenate_videoclips(clips)
+
+    # Load the audio clips
+    audio_clips = [AudioFileClip(aud) for aud in auds]
+
+    # Concatenate the audio clips
+    audio = concatenate_audioclips(audio_clips)
+
+    # Load the background audio
+    bg_audio = AudioFileClip(bg_aud)
+
+    audio = audio.volumex(0.8)  # Adjust volume of the main audio
+    bg_audio = bg_audio.volumex(0.2)  # Adjust volume of the background audio
+
+    # Combine the two audio clips
+    combined_audio = CompositeAudioClip([audio, bg_audio])
+
+    # Set the combined audio to the final video
+    final_clip = final_clip.set_audio(combined_audio)
+
+    # Write the result to a file (you can choose the output path and format)
+    final_clip.write_videofile(
+        f"{name}.mp4", codec="libx264", threads=8, preset='ultrafast')
+
+def add_subtitle(input_file, subtitle_file, output_file):
+    # FFmpeg command to add subtitles to the input video
+    ffmpeg_command = [
+        "ffmpeg",
+        "-y",                            # Overwrite output files without asking
+        "-i", input_file,                # Input video file
+        "-vf", f"subtitles={subtitle_file}",  # Add subtitles from the SRT file
+        "-c:v", "libx264",               # Video codec (H.264)
+        "-c:a", "copy",                  # Copy audio without re-encoding
+        output_file
     ]
-    
-    # Run the command
-    subprocess.run(command)
 
-def combine_videos_and_audios(video_paths: List[str], audio_paths: List[str], output_path: str) -> None:
-    # Load video clips
-    video_clips = [VideoFileClip(path) for path in video_paths]
-    
-    # Concatenate video clips
-    final_video = concatenate_videoclips(video_clips)
-    
-    # Load audio clips
-    audio_clips = [AudioFileClip(path) for path in audio_paths]
-    
-    # Concatenate audio clips
-    final_audio = concatenate_videoclips(audio_clips, method="compose")
-    
-    # Set the audio of the final video
-    final_video = final_video.set_audio(final_audio)
-    
-    # Write the result to a file
-    final_video.write_videofile(output_path, codec='libx264', audio_codec='aac')
-    
-    # Close all clips to free up system resources
-    final_video.close()
-    for clip in video_clips + audio_clips:
-        clip.close()
-
-cloudinary.config(
-    cloud_name = "dz1lxpkck",
-    api_key = "895141239714285",
-    api_secret = "3-z-J15QQQmB6EddTHws1-wzjF4"
-)
-
-def combine_videos_and_audios_cloudinary(video_public_ids: List[str], audio_public_ids: List[str], output_public_id: str) -> str:
-    # Prepare the video concatenation
-    video_parts = [{"public_id": vid} for vid in video_public_ids]
-    
-    # Prepare the audio concatenation
-    audio_parts = [{"public_id": aud} for aud in audio_public_ids]
-    
-    # Combine videos
-    video_upload_result = cloudinary.uploader.upload(
-        "video:",
-        public_id=f"{output_public_id}_video",
-        resource_type="video",
-        eager=[{
-            "transformation": [
-                {"overlay": vid, "width": 1920, "height": 1080, "crop": "scale"} 
-                for vid in video_parts
-            ],
-            "format": "mp4"
-        }],
-        eager_async=True
-    )
-    
-    # Combine audios
-    audio_upload_result = cloudinary.uploader.upload(
-        "video:",
-        public_id=f"{output_public_id}_audio",
-        resource_type="video",
-        eager=[{
-            "transformation": [
-                {"overlay": aud} for aud in audio_parts
-            ],
-            "format": "mp3"
-        }],
-        eager_async=True
-    )
-    
-    # Combine the concatenated video and audio
-    final_upload_result = cloudinary.uploader.upload(
-        f"video:cloudinary:{video_upload_result['public_id']}",
-        public_id=output_public_id,
-        resource_type="video",
-        eager=[{
-            "transformation": [
-                {"overlay": f"video:{audio_upload_result['public_id']}", "flags": "layer_apply"}
-            ],
-            "format": "mp4"
-        }],
-        eager_async=True
-    )
-    
-    # Return the URL of the resulting video
-    return cloudinary.utils.cloudinary_url(output_public_id, resource_type="video", format="mp4")[0]
-
-
-video_files = ['vid1.mp4', 'vid2.mp4', 'vid3.mp4', 'vid4.mp4']
-audio_files = ['temp_audio_1_english.mp3', 'temp_audio_2_english.mp3', 'temp_audio_3_english.mp3', 'temp_audio_0_english.mp3']
-captions_file = 'subtitles/4321.srt'
-background_music = 'temp_audio/adjusted_background_audio.mp3'
-output_file = 'output.mp4'
-
-combine_videos_and_audios_cloudinary(video_files, audio_files, output_file)
-
-# combine_videos_and_audios(video_files, audio_files, output_file)
-
+    # Run the FFmpeg command
+    subprocess.run(ffmpeg_command)

@@ -302,7 +302,8 @@ async def gen_script_and_choose_vid(pdf_content, n):
         "Daily Needs": "vid1 description: a man is filling out bills. vid2 description: young boy gets injured and falls off the cycle, mother tends to him with a bandaid. vid3 description: a happy couple shops for groceries. vid4 description: working out in gym. vid5 description: heavy rains drowns a car"
     }
 
-    chosen = classify_vid_genre(pdf_content=pdf_content)
+    chosen = await classify_vid_genre(pdf_content=pdf_content)
+    print(chosen)
 
     chosen_description = description_dict.get(chosen)
 
