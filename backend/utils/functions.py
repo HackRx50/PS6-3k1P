@@ -195,19 +195,20 @@ async def generate_video(scripts, processId, captions, languages):
         #     for j, script in enumerate(scripts):
         #         await gen_and_save_audio(script['Script'], f'temp_auds/{processId}_{j}', language)
         
+        gen_and_save_srt(scripts, processId)
+        
         lang = 'hindi'
         
-        audios = [f'temp_auds/{processId}_{i}_{lang}.mp3' for i in range(len(scripts))]
-        images = sorted([f"temp_imgs/{processId}/{f}" for f in os.listdir(f"temp_imgs/{processId}") if f.endswith('.png')])
+        # audios = [f'temp_auds/{processId}_{i}_{lang}.mp3' for i in range(len(scripts))]
+        # images = sorted([f"temp_imgs/{processId}/{f}" for f in os.listdir(f"temp_imgs/{processId}") if f.endswith('.png')])
         
-        print("audios", audios)
-        print("images", images)
+        # print("audios", audios)
+        # print("images", images)
         
         
-        
-        # combine audio and video.
-        await combine_audio_and_video(f'{processId}_{lang}', audios, images)
-        
+        # # combine audio and video.
+        # await combine_audio_and_video(f'{processId}_{lang}', audios, images)
+        add_subtitle(f'vids/{processId}_{lang}.mp4', f'subtitles/{processId}.srt', f'vids/{processId}_{lang}_final.mp4')
         
     except Exception as e:
         print(e)
@@ -413,15 +414,21 @@ def get_audio_length(file_path):
 def gen_and_save_srt(scripts, name):
     cumulative_time_ms = 0  
     srt_entry_number = 1  
-    srt_file_path = f'tmp/{name}.srt'  
+    srt_file_path = f'subtitles/{name}.srt'  
 
-    with open(srt_file_path, 'w') as srt_file:  
-        for i in range(len(scripts)):
+    with open(srt_file_path, 'w') as srt_file:
+        for ind in range(len(scripts)):
             
-            sentences = re.split(r'(?<=[,.])\s*', scripts[i]['Script'])
+            N = 3
+            split = scripts[ind]['Script'].split(' ')
+            split = [word for word in split if word.strip()]
+
+            sentences = [' '.join(split[i:i+N]) for i in range(0, len(split), N)]            
+            # sentences = re.split(r'(?<=[,.])\s*', scripts[i]['Script'])
             
-            audio_length = get_audio_length(f'temp_auds/{i}.mp3') * 1000  
-            total_script_length = len(scripts[i]['Script'])  
+            audio_length = get_audio_length(f'temp_auds/{name}_{ind}_English.mp3') * 1000  
+            
+            total_script_length = len(scripts[ind]['Script'])  
             
             for sentence in sentences:
                 sentence_length = len(sentence)  
