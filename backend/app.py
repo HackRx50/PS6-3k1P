@@ -1,8 +1,6 @@
 import asyncio
 import json
 import os
-import random
-import time
 import uuid
 
 import boto3
