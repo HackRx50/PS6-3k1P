@@ -57,7 +57,8 @@ async def gen_and_save_audio(script, file_path, language):
             "telugu": "te",
             "malayalam": "ml",
             "kannada": "kn",
-            "bengali": "bn"
+            "bengali": "bn",
+            "punjabi": "pa",
         }
 
         translation_language_code = translation_language_codes.get(language.lower(), "hi")
@@ -73,14 +74,15 @@ async def gen_and_save_audio(script, file_path, language):
     synthesis_input = texttospeech.SynthesisInput(text=script)
 
     language_codes = {
-    "english": "en-US",
-    "hindi": "hi-IN",
-    "marathi": "mr-IN",
-    "tamil": "ta-IN",
-    "telugu": "te-IN",
-    "malayalam": "ml-IN",
-    "kannada": "kn-IN",
-    "bengali": "bn-IN"
+        "english": "en-US",
+        "hindi": "hi-IN",
+        "marathi": "mr-IN",
+        "tamil": "ta-IN",
+        "telugu": "te-IN",
+        "malayalam": "ml-IN",
+        "kannada": "kn-IN",
+        "bengali": "bn-IN",
+        "punjabi": "pa-IN",
     }
 
     # Get the language code from the dictionary

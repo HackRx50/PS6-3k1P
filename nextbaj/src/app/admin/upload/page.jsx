@@ -3,7 +3,7 @@
 import { useState } from "react"
 import ImageComp from "./ImageComp"
 
-const LANGUAGES = ["English", "Hindi", "Marathi", "Tamil", "Telugu", "Kannada", "Malayalam", "Bengali", "Gujarati", "Punjabi", "Odia"]
+const LANGUAGES = ["english", "hindi", "marathi", "tamil", "telugu", "kannada", "malayalam", "bengali", "gujarati", "punjabi"]
 
 function Admin() {
   const [selectedFile, setSelectedFile] = useState(null)
@@ -265,7 +265,7 @@ function Admin() {
                       }}
                     />
                     <label htmlFor={`language-${index}`} className="my-auto text-gray-700">
-                      {language}
+                      {language.charAt(0).toUpperCase() + language.slice(1)}
                     </label>
                   </div>
                 ))}
