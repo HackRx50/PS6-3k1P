@@ -16,7 +16,6 @@ from openai import OpenAI
 from database import *
 
 
-
 def format_time(s):
     hours = int(s // 3600)
     minutes = int((s % 3600) // 60)
@@ -254,7 +253,7 @@ def audio_length(file_path):
 
 async def combcomb(vids, auds, name):
     bajaj = "stockvids/bajaj/bajaj_logo.mp4"
-    bg_aud = "temp_auds/bg_upbeat.mp3"
+    bg_aud = "temp_auds/bgm.mp3"
     
     audio_clips = [AudioFileClip(aud) for aud in auds]
     
@@ -282,8 +281,8 @@ async def combcomb(vids, auds, name):
     # Load the background audio
     bg_audio = AudioFileClip(bg_aud).subclip(0, total_len)
 
-    audio = audio.volumex(0.8)  # Adjust volume of the main audio
-    bg_audio = bg_audio.volumex(0.2)  # Adjust volume of the background audio
+    audio = audio.volumex(0.95)  # Adjust volume of the main audio
+    bg_audio = bg_audio.volumex(0.05)  # Adjust volume of the background audio
 
     # Combine the two audio clips
     combined_audio = CompositeAudioClip([audio, bg_audio])

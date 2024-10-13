@@ -111,7 +111,7 @@ async def generate_video_route(videoRequest: VideoRequest, db: Session = Depends
 
         await gengen(videoRequest.scripts, videoRequest.processId, videoRequest.chosen, videoRequest.languages)
         for lang in videoRequest.languages:
-            await upload_to_s3(f"{videoRequest.processId}_{lang}.mp4")
+            await upload_to_s3(f"{videoRequest.processId}_{lang}")
 
             # add new record to VideoDB
             video = VideoDB(name=VideoRequest.processId,

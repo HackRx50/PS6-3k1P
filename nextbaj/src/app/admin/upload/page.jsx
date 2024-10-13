@@ -21,7 +21,7 @@ function Admin() {
   const [uploadStatus, setUploadStatus] = useState("")
   const [selectedCard, setSelectedCard] = useState(0)
   const [numberOfSlides, setNumberOfSlides] = useState(45)
-  const [processId, setProcessId] = useState(Math.floor(Math.random() * 1000000))
+  const [processId, setProcessId] = useState(Math.floor(Math.random() * 1000000).toString())
   const [height, setHeight] = useState(960)
   const [width, setWidth] = useState(544)
   const [chosen, setChosen] = useState(true)
@@ -37,10 +37,10 @@ function Admin() {
   }
 
   const handleUpload = async () => {
-    // if (!selectedFile) {
-    //   setUploadStatus("Please select a PDF file.")
-    //   return
-    // }
+    if (!selectedFile) {
+      setUploadStatus("Please select a PDF file.")
+      return
+    }
 
     if (numberOfSlides < 1) {
       setUploadStatus("Please enter a valid number of slides.")
@@ -243,7 +243,7 @@ function Admin() {
                     "Content-Type": "application/json",
                   },
                   body: JSON.stringify({
-                    processId: processId,
+                    processId: processId.toString(),
                     scripts: scripts,
                     chosen: chosen,
                     languages: languages,
