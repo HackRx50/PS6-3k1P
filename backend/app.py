@@ -272,6 +272,7 @@ async def create_user(user: UserCreate, db: Session = Depends(get_db)):
 
 @app.get('/get_video_id/{video_id}')
 async def get_video_id_route(video_id: int, db: Session = Depends(get_db)):
+    print(video_id)
     try:
         video_data = db.query(VideoDB).filter(VideoDB.id == video_id).first()
         if not video_data:

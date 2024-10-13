@@ -96,6 +96,8 @@ async def gen_script_and_choose_vid(pdf_content, n):
     
     desc_dict = json.dumps(description_dict[chosen])
     print(desc_dict)
+    
+    prompt = ''''''
 
     prompt = '''Think of yourself as an expert script writter for compeling social media video\n\nContent:''' + pdf_content + "\n\n" + \
         f'''From the content, make script for a concise and interesting video while keeping in mind that multiple corresponding videos will support each subscript.The description of the videos are as following. {desc_dict}. The script must have a storyline and be written keeping in mind the description of video. Do not use vid description to write the script, just use it to choose. The narrative should mention the product as the one that solves the problem. The entire script generated should be such that the time taken to speak collection of all subscripts is less than {n} seconds. Accordingly choose number of scripts. Format the answer only as a list of json objects with just 2 key called Subscript and Video. Only give the json. No emojis. '''
