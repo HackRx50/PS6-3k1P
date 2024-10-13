@@ -288,7 +288,7 @@ async def get_script_from_pdf(file_path, n):
 
 
 async def classify_vid_genre(pdf_content):
-    prompt = "Content: "+pdf_content+"\nClassify the above into one of three option based on what it is about.the options are Car, Health and Daily Needs.The output should be ONLY one of the options, nothing else"
+    prompt = "Content: "+pdf_content+"\nClassify the above into one of three option based on what it is about.the options are Car, Health, Daily Needs.The output should be ONLY one of the options, nothing else"
     ans = await chat_completion(prompt)
 
     return ans
@@ -308,7 +308,7 @@ async def gen_script_and_choose_vid(pdf_content, n):
     chosen_description = description_dict.get(chosen)
 
     n= n/10
-    prompt = '''Content:''' + pdf_content + "\n\n" + f'''Think of yourself as an expert script writter for compeling social media videos. From the content, make scripts for a video with a storyline and choose the most suitable video from descriptions and keep in mind each script is spoken with respect to a video. The description of the videos are as following. {chosen_description}.The scripts must include all the important information in content for any customer. Each script should 1)not use vid description as is to write the script, just use it to choose 2)be less than 25 words 3) have a total of ONLY{n} scripts. The narrative should mention the product as the one that solves the problem.  Use simpler language, make it sound more natural like someone is narrating a story. Choose the videos in any order, no repetition. The answer should contain the subscript to be spoken and corresponding chosen vid. Format the answer ONLY as a list of json objects with 2 key called Subscript and Video(containes name of chosen video). Only give the json.'''
+    prompt = '''Content:''' + pdf_content + "\n\n" + f'''Think of yourself as an expert script writter for compeling social media videos. From the content, make scripts for a video with a storyline and for each script, choose the most suitable videos for from descriptions. The description of the videos are as following. {chosen_description}.The scripts must include all the important information in content for any customer. Each script should 1)not use vid description as is to write the script, just use it to choose 2)be less than 25 words 3) have a total of ONLY{n} scripts. The narrative should mention the product as solution for the problem. Use simpler language, make it sound more natural like someone is narrating a story. Don't have to stick to any sequence while chosing video and planning script, no repetition of video. The answer should contain the subscript to be spoken and corresponding chosen vid. Format the answer ONLY as a list of json objects with 2 key called Subscript and Video(containes name of chosen video). Only give the json.'''
     ans = await chat_completion(prompt)
     ans = ans.strip("```")
     ans = ans.split("json")[1]
